@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Compliance Workspace - 智能合規工作台</title>
+  <meta name="description" content="AI-Native 金融消費爭議合規工作台 - 搜尋、分析、引法、諮詢一體化解決方案">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-light: #F8FAFC;
+      --bg-card: #FFFFFF;
+      --bg-card-hover: #F8FAFC;
+      --border-color: rgba(0, 0, 0, 0.06);
+      --border-active: #C5A059;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      
+      --accent-gold: #C5A059;
+      --accent-gold-dark: #A37E3A;
+      --accent-gold-glow: rgba(197, 160, 89, 0.12);
+      --accent-blue: #1E3A8A;
+      --accent-blue-hover: #1A306E;
+      --accent-blue-glow: rgba(30, 58, 138, 0.08);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --gap: 1.25rem;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.02);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-main);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Ambient Background Orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(140px);
+      z-index: 0;
+      opacity: 0.15;
+      pointer-events: none;
+    }
+    .orb-left {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(197, 160, 89, 0.3) 0%, transparent 70%);
+      top: 15%;
+      left: -100px;
+    }
+    .orb-right {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(30, 58, 138, 0.15) 0%, transparent 70%);
+      bottom: 10%;
+      right: -100px;
+    }
+
+    /* Header Styling */
+    header {
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0.85rem var(--gap);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.01);
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      cursor: pointer;
+    }
+    .brand-logo svg {
+      width: 28px;
+      height: 28px;
+      filter: drop-shadow(0 2px 4px rgba(197, 160, 89, 0.2));
+    }
+    .brand-logo h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      background: linear-gradient(135deg, #1E293B, #475569);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(0, 0, 0, 0.02);
+      border: 1px solid var(--border-color);
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-sm);
+    }
+    .user-avatar {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .user-name {
+      font-size: 0.85rem;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+    .user-role {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Interactive Search Section */
+    .search-section {
+      z-index: 5;
+      padding: var(--gap);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .search-wrapper {
+      display: flex;
+      gap: 0.75rem;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .search-input-container {
+      position: relative;
+      flex: 1;
+    }
+
+    .search-input-container svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      width: 18px;
+      height: 18px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 2.5rem;
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      font-size: 0.95rem;
+      transition: all 0.3s;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 10px var(--accent-gold-glow);
+    }
+
+    .search-btn {
+      padding: 0 1.5rem;
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark));
+      border: none;
+      border-radius: var(--radius-md);
+      color: #FFF;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.3s;
+      box-shadow: 0 4px 10px rgba(197, 160, 89, 0.25);
+    }
+
+    .search-btn:hover {
+      box-shadow: 0 6px 15px rgba(197, 160, 89, 0.35);
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    .quick-tags {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+    }
+
+    .tag-btn {
+      background: rgba(0, 0, 0, 0.02);
+      border: 1px solid var(--border-color);
+      padding: 0.25rem 0.65rem;
+      border-radius: var(--radius-sm);
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tag-btn:hover {
+      background: rgba(197, 160, 89, 0.08);
+      border-color: rgba(197, 160, 89, 0.3);
+      color: var(--accent-gold-dark);
+    }
+
+    /* Main Workspace Layout */
+    .workspace-container {
+      z-index: 5;
+      flex: 1;
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    /* Left Sidebar: Case Info */
+    .case-sidebar {
+      border-right: 1px solid var(--border-color);
+      padding: var(--gap);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    .sidebar-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+
+    /* Sidebar States */
+    .empty-sidebar-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: var(--text-muted);
+      padding: 2rem 1rem;
+      border: 1px dashed rgba(0, 0, 0, 0.08);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .empty-sidebar-state svg {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 1rem;
+      color: rgba(0, 0, 0, 0.15);
+    }
+
+    .empty-sidebar-state p {
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    /* Upload & Manual Creator Styles */
+    .upload-dropzone {
+      border: 2px dashed rgba(197, 160, 89, 0.3);
+      border-radius: var(--radius-md);
+      padding: 1.5rem 1rem;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.6);
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: var(--gap);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    
+    .upload-dropzone:hover, .upload-dropzone.dragover {
+      background: rgba(197, 160, 89, 0.05);
+      border-color: var(--accent-gold);
+      box-shadow: 0 4px 12px rgba(197, 160, 89, 0.1);
+    }
+    
+    .upload-dropzone svg {
+      width: 32px;
+      height: 32px;
+      color: var(--accent-gold);
+      margin-bottom: 0.25rem;
+    }
+    
+    .upload-dropzone p {
+      font-size: 0.8rem;
+      color: var(--text-main);
+      font-weight: 500;
+    }
+    
+    .upload-dropzone span {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .creator-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin: 1rem 0;
+    }
+    .creator-divider::before, .creator-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--border-color);
+    }
+    .creator-divider:not(:empty)::before {
+      margin-right: .5em;
+    }
+    .creator-divider:not(:empty)::after {
+      margin-left: .5em;
+    }
+
+    .manual-case-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: var(--gap);
+      text-align: left;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .form-group label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+      padding: 0.5rem;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      background: #FFFFFF;
+      color: var(--text-main);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: var(--accent-gold);
+    }
+
+    .creator-btn {
+      width: 100%;
+      padding: 0.6rem;
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark));
+      border: none;
+      border-radius: var(--radius-sm);
+      color: #FFF;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 10px rgba(197, 160, 89, 0.2);
+    }
+
+    .creator-btn:hover {
+      box-shadow: 0 6px 15px rgba(197, 160, 89, 0.3);
+      filter: brightness(1.05);
+    }
+
+    .reset-workspace-btn {
+      padding: 0.25rem 0.5rem;
+      background: rgba(0, 0, 0, 0.02);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      border-radius: var(--radius-sm);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .reset-workspace-btn:hover {
+      background: rgba(197, 160, 89, 0.05);
+      border-color: var(--accent-gold);
+      color: var(--accent-gold-dark);
+    }
+
+    .case-details-card {
+      display: none; /* Shown dynamically */
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: var(--gap);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0,0,0,0.01);
+      animation: zoomIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes zoomIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .case-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .case-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--radius-sm);
+      text-transform: uppercase;
+    }
+
+    .badge-review {
+      background: rgba(197, 160, 89, 0.12);
+      color: var(--accent-gold-dark);
+      border: 1px solid rgba(197, 160, 89, 0.3);
+    }
+    
+    .badge-progress {
+      background: rgba(30, 58, 138, 0.08);
+      color: var(--accent-blue);
+      border: 1px solid rgba(30, 58, 138, 0.2);
+    }
+
+    .case-id-text {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--text-main);
+      margin-bottom: 0.2rem;
+    }
+
+    .case-applicant-text {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .card-divider {
+      height: 1px;
+      background: var(--border-color);
+      margin: 0.85rem 0;
+    }
+
+    .info-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+    }
+
+    .info-label {
+      color: var(--text-muted);
+    }
+
+    .info-value {
+      font-weight: 500;
+      color: var(--text-main);
+      max-width: 60%;
+      text-align: right;
+    }
+
+    .case-action-btn {
+      margin-top: 1.2rem;
+      width: 100%;
+      padding: 0.65rem;
+      background: rgba(0, 0, 0, 0.02);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      border-radius: var(--radius-sm);
+      color: var(--text-main);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .case-action-btn:hover {
+      background: var(--accent-gold-glow);
+      border-color: var(--accent-gold);
+      color: var(--accent-gold-dark);
+    }
+
+    /* Right Side: AI Workspace */
+    .ai-workspace {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      overflow: hidden;
+      background: transparent;
+      position: relative;
+    }
+
+    /* Chat & Reference Split Layout */
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      overflow: hidden;
+    }
+
+    /* Chat Area */
+    .chat-section {
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: var(--gap);
+      gap: var(--gap);
+      border-right: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .chat-welcome-state {
+      margin: auto;
+      text-align: center;
+      max-width: 480px;
+      padding: 2rem;
+      color: var(--text-muted);
+    }
+
+    .chat-welcome-state svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 1.25rem;
+      color: var(--accent-gold);
+      filter: drop-shadow(0 2px 6px rgba(197, 160, 89, 0.2));
+    }
+
+    .chat-welcome-state h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      color: var(--text-main);
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .chat-welcome-state p {
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    /* Chat Bubble Streams */
+    .chat-stream {
+      display: none; /* Shown dynamically */
+      flex-direction: column;
+      gap: var(--gap);
+    }
+
+    .message-row {
+      display: flex;
+      gap: 0.75rem;
+      max-width: 85%;
+    }
+
+    .message-row.user {
+      align-self: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .message-row.assistant {
+      align-self: flex-start;
+    }
+
+    .message-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .message-row.user .message-avatar {
+      background: rgba(0, 0, 0, 0.05);
+      color: #334155;
+      border: 1px solid var(--border-color);
+    }
+
+    .message-row.assistant .message-avatar {
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-blue));
+      color: #fff;
+    }
+
+    .message-bubble {
+      padding: 0.85rem 1.1rem;
+      border-radius: var(--radius-lg);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .message-row.user .message-bubble {
+      background: rgba(30, 58, 138, 0.05);
+      border: 1px solid rgba(30, 58, 138, 0.15);
+      border-top-right-radius: 4px;
+      color: var(--text-main);
+    }
+
+    .message-row.assistant .message-bubble {
+      background: var(--bg-card);
+      border: 1px solid rgba(197, 160, 89, 0.15);
+      border-left: 3px solid var(--accent-gold);
+      border-top-left-radius: 4px;
+      color: var(--text-main);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.01);
+    }
+
+    .message-row.system {
+      align-self: center;
+      max-width: 100%;
+      margin: 0.5rem 0;
+    }
+
+    .message-row.system .message-bubble {
+      background: rgba(0, 0, 0, 0.02);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      padding: 0.35rem 0.8rem;
+      border-radius: var(--radius-sm);
+    }
+
+    /* Typing Loader Indicator */
+    .typing-loader {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 0;
+    }
+
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--text-muted);
+      border-radius: 50%;
+      opacity: 0.5;
+      animation: typing 1.4s infinite both;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing {
+      0%, 100% { transform: translateY(0); opacity: 0.5; }
+      50% { transform: translateY(-4px); opacity: 1; }
+    }
+
+    /* Reference & Summary Panel (Right side of Chat) */
+    .reference-panel {
+      padding: var(--gap);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--gap);
+      background: rgba(255, 255, 255, 0.3);
+      border-left: 1px solid var(--border-color);
+    }
+
+    .panel-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: border-color 0.3s;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.01);
+    }
+
+    .panel-section:focus-within, .panel-section:hover {
+      border-color: rgba(197, 160, 89, 0.2);
+    }
+
+    .panel-header {
+      padding: 0.75rem var(--gap);
+      background: rgba(0, 0, 0, 0.01);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .panel-header svg {
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      transition: transform 0.2s;
+    }
+
+    .panel-header.collapsed svg {
+      transform: rotate(-90deg);
+    }
+
+    .panel-content {
+      padding: var(--gap);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      transition: max-height 0.3s ease-out;
+      overflow: hidden;
+    }
+
+    /* References list items */
+    .law-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .law-item {
+      background: rgba(0, 0, 0, 0.01);
+      border: 1px solid rgba(0, 0, 0, 0.02);
+      border-radius: var(--radius-sm);
+      padding: 0.6rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .law-item:hover {
+      background: rgba(197, 160, 89, 0.04);
+      border-color: rgba(197, 160, 89, 0.25);
+    }
+
+    .law-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-gold-dark);
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .law-title svg {
+      width: 12px;
+      height: 12px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .law-item:hover .law-title svg {
+      opacity: 1;
+    }
+
+    .law-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .summary-text {
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: var(--text-main);
+    }
+
+    .summary-bullet {
+      margin-bottom: 0.5rem;
+      display: flex;
+      gap: 0.4rem;
+    }
+    .summary-bullet::before {
+      content: '•';
+      color: var(--accent-gold);
+      font-weight: 700;
+    }
+
+    /* Bottom Control Bar: Prompt Input & Export */
+    .control-section {
+      border-top: 1px solid var(--border-color);
+      padding: var(--gap);
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      z-index: 10;
+    }
+
+    /* Quick Prompt suggestions */
+    .quick-prompts {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .prompt-chip {
+      background: #FFFFFF;
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      padding: 0.35rem 0.8rem;
+      border-radius: var(--radius-pill);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.2s;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.01);
+    }
+
+    .prompt-chip:hover {
+      background: rgba(0, 0, 0, 0.01);
+      border-color: rgba(30, 58, 138, 0.25);
+      color: var(--accent-blue);
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
+
+    .prompt-input-container {
+      flex: 1;
+      position: relative;
+      background: #FFFFFF;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: var(--radius-md);
+      transition: all 0.3s;
+    }
+
+    .prompt-input-container:focus-within {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 10px rgba(30, 58, 138, 0.1);
+    }
+
+    .prompt-textarea {
+      width: 100%;
+      border: none;
+      background: transparent;
+      padding: 0.75rem 1rem;
+      color: var(--text-main);
+      font-size: 0.92rem;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      height: 48px;
+      max-height: 180px;
+      overflow-y: auto;
+      line-height: 1.5;
+      transition: height 0.1s ease;
+    }
+
+    .send-btn {
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      width: 32px;
+      height: 32px;
+      background: var(--accent-blue);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: #FFF;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .send-btn:hover {
+      background: var(--accent-blue-hover);
+      box-shadow: 0 2px 6px rgba(30, 58, 138, 0.2);
+    }
+
+    .send-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .export-btn {
+      height: 48px;
+      padding: 0 1.25rem;
+      background: #FFFFFF;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: var(--radius-md);
+      color: var(--text-main);
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .export-btn:hover {
+      background: rgba(0, 0, 0, 0.02);
+      border-color: var(--text-muted);
+    }
+
+    /* Modal / Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 120px;
+      right: 20px;
+      background: rgba(30, 58, 138, 0.95);
+      color: #FFF;
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      z-index: 100;
+      display: none;
+      animation: slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* Responsive Design adjustments */
+    @media (max-width: 992px) {
+      .workspace-container {
+        grid-template-columns: 1fr;
+      }
+      .case-sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        max-height: 250px;
+      }
+      .workspace-grid {
+        grid-template-columns: 1fr;
+      }
+      .reference-panel {
+        border-top: 1px solid var(--border-color);
+        max-height: 200px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient background lighting -->
+  <div class="orb orb-left"></div>
+  <div class="orb orb-right"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand-logo" onclick="location.href='v2_landing.html'">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#grad1)"/>
+        <path d="M2 17L12 22L22 17" stroke="url(#grad2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2 12L12 17L22 12" stroke="url(#grad2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs>
+          <linearGradient id="grad1" x1="2" y1="2" x2="22" y2="12" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#C5A059" />
+            <stop offset="100%" stop-color="#1E3A8A" />
+          </linearGradient>
+          <linearGradient id="grad2" x1="2" y1="12" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#C5A059" />
+            <stop offset="100%" stop-color="#1E3A8A" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <h2>Compliance Workspace</h2>
+    </div>
+    
+    <div class="user-profile">
+      <div class="user-avatar">林</div>
+      <div>
+        <div class="user-name">林專員</div>
+        <div class="user-role">金融合規部</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Search Section -->
+  <section class="search-section">
+    <div class="search-wrapper">
+      <div class="search-input-container">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="case-search" class="search-input" placeholder="輸入案件編號 (如: C-20231015-001) 或關鍵字...">
+      </div>
+      <button class="search-btn" onclick="triggerSearch()">
+        <span>搜尋</span>
+      </button>
+    </div>
+    <div class="quick-tags">
+      <span>快速試用:</span>
+      <button class="tag-btn" onclick="setSearch('C-20231015-001')">C-20231015-001 (投資型保單)</button>
+      <button class="tag-btn" onclick="setSearch('C-20231102-005')">C-20231102-005 (實支實付險)</button>
+    </div>
+  </section>
+
+  <!-- Main Workspace Grid -->
+  <main class="workspace-container">
+    
+    <!-- Sidebar: Case Info -->
+    <aside class="case-sidebar">
+      <div class="sidebar-title">案件資訊</div>
+      
+      <!-- Empty sidebar state (Interactive Uploader & Creator) -->
+      <div id="sidebar-empty" style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
+        
+        <!-- Drag & Drop Zone -->
+        <div class="upload-dropzone" id="upload-zone" onclick="document.getElementById('case-file-input').click()">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"></path>
+          </svg>
+          <p>拖曳案件 PDF/CSV 至此上傳</p>
+          <span>或 點擊此處瀏覽檔案</span>
+          <input type="file" id="case-file-input" style="display: none;" accept=".pdf,.csv,.txt" onchange="handleFileSelect(event)">
+        </div>
+
+        <div class="creator-divider">或 手動填寫自訂案件</div>
+
+        <!-- Manual Creator Form -->
+        <div class="manual-case-form">
+          <div class="form-group">
+            <label for="form-applicant">申請人姓名</label>
+            <input type="text" id="form-applicant" placeholder="例如: 王○○（52歲）">
+          </div>
+          <div class="form-group">
+            <label for="form-type">案件類型</label>
+            <select id="form-type">
+              <option value="金融消費爭議 (投資型商品)">金融消費爭議 (投資型商品)</option>
+              <option value="保險理賠爭議 (醫療險)">保險理賠爭議 (醫療險)</option>
+              <option value="信用卡交易爭議">信用卡交易爭議</option>
+              <option value="其他金保爭議">其他金保爭議</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="form-item">爭議要點 / 項目</label>
+            <input type="text" id="form-item" placeholder="例如: 理專涉嫌違反告知義務">
+          </div>
+          <div class="form-group">
+            <label for="form-amount">爭議金額</label>
+            <input type="text" id="form-amount" placeholder="例如: NT$ 150,000">
+          </div>
+          <button class="creator-btn" onclick="createCustomCaseFromForm()">建立並載入案件</button>
+        </div>
+
+      </div>
+
+      <!-- Case Card (populates dynamically) -->
+      <div class="case-details-card" id="sidebar-card">
+        <div class="case-card-header">
+          <div>
+            <div class="case-id-text" id="case-id">-</div>
+            <div class="case-applicant-text">申請人: <span id="case-applicant">-</span></div>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem;">
+            <span class="case-badge" id="case-badge-status">-</span>
+            <button class="reset-workspace-btn" onclick="resetWorkspace()">重設會話 ↺</button>
+          </div>
+        </div>
+        
+        <div class="card-divider"></div>
+        
+        <div class="info-grid">
+          <div class="info-row">
+            <span class="info-label">案件類型</span>
+            <span class="info-value" id="case-type">-</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">爭議項目</span>
+            <span class="info-value" id="case-item">-</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">爭議金額</span>
+            <span class="info-value" id="case-amount">-</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">建立日期</span>
+            <span class="info-value" id="case-created">-</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">最後更新</span>
+            <span class="info-value" id="case-updated">-</span>
+          </div>
+        </div>
+
+        <button class="case-action-btn" onclick="askAiToAnalyzeCase()">啟動 AI 深度分析</button>
+      </div>
+    </aside>
+
+    <!-- Workspace Columns: AI Chat & Law details -->
+    <section class="ai-workspace">
+      
+      <div class="workspace-grid">
+        
+        <!-- Chat column -->
+        <div class="chat-section" id="chat-scroller">
+          <!-- Welcome instructions -->
+          <div class="chat-welcome-state" id="chat-empty">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+            </svg>
+            <h3>Compliance AI 協作室</h3>
+            <p>已備妥法規庫與案例引擎。請在上方載入案件，AI 將會在此與您一同審查合規風險、比對適法性並擬定合規報告。</p>
+          </div>
+
+          <!-- Chat Stream Container -->
+          <div class="chat-stream" id="chat-container">
+            <!-- Dynamically populates messages -->
+          </div>
+        </div>
+
+        <!-- Law References / Summary Sidebar -->
+        <aside class="reference-panel">
+          
+          <!-- Law Ref Section -->
+          <div class="panel-section">
+            <div class="panel-header" onclick="toggleSection('laws-content', this)">
+              <span>⚖️ 檢索相關法規</span>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </div>
+            <div class="panel-content" id="laws-content">
+              <div class="law-list" id="sidebar-laws-list">
+                <div style="font-size: 0.8rem; color: var(--text-muted);">尚未載入案件相關法規。</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Summary Section -->
+          <div class="panel-section">
+            <div class="panel-header" onclick="toggleSection('summary-content', this)">
+              <span>📝 AI 案件爭議要點</span>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            </div>
+            <div class="panel-content" id="summary-content">
+              <div id="sidebar-summary-list" style="font-size: 0.8rem; color: var(--text-muted);">
+                尚未載入案件摘要。
+              </div>
+            </div>
+          </div>
+
+        </aside>
+
+      </div>
+
+      <!-- Bottom Control Bar -->
+      <footer class="control-section">
+        <!-- Quick prompt tags -->
+        <div class="quick-prompts" id="quick-prompts-bar">
+          <button class="prompt-chip" onclick="useQuickPrompt('請針對此案進行合規分析，條列合規與不合規之處。')">🔍 案件合規審查</button>
+          <button class="prompt-chip" onclick="useQuickPrompt('本案有何和解或解決爭議的建議？')">💡 和解方案建議</button>
+          <button class="prompt-chip" onclick="useQuickPrompt('撰寫此案的正式金融爭議合規審查報告草稿。')">📄 生成合規報告</button>
+        </div>
+
+        <div class="input-wrapper">
+          <div class="prompt-input-container">
+            <textarea id="prompt-input" class="prompt-textarea" placeholder="在此輸入您的合規諮詢或追問問題... (按下 Enter 發送)" onkeydown="checkSubmit(event)" oninput="autoGrow(this)"></textarea>
+            <button class="send-btn" onclick="handleSendText()">
+              <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </div>
+          <button class="export-btn" onclick="triggerExport()">
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            <span>匯出報告</span>
+          </button>
+        </div>
+      </footer>
+
+    </section>
+
+  </main>
+
+  <!-- Toast popup -->
+  <div class="toast" id="toast-notify">正在生成 PDF 報告，請稍候...</div>
+
+  <!-- Database & Interface Logic -->
+  <script>
+    // API Configuration
+    const API_BASE = 'https://cloud.geminidata.com/api/v1';
+    const JWT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTllNTJlMDc2M2RlMDAyZDJiZDNlYyIsImlzQVBJIjp0cnVlLCJnX3VpZCI6IjZhNDNhMGVmMDc2M2RlMDAyZDI3ZTVjYyIsImdfYWRtaW4iOmZhbHNlLCJnX2RlbW9hZG1pbiI6ZmFsc2UsImdfYWNjb3VudGFkbWluIjpmYWxzZSwiZ190aWQiOiI2YTQzOWU2NzA3NjNkZTAwMmQyN2Q2YmQ6cHJvZHVjZXIiLCJnX3RpZF9wZXJtaXNzaW9uIjpbIm1ldGE6dXBkYXRlIiwic291cmNlOnJlYWQiLCJzb3VyY2U6dXBkYXRlIiwic291cmNlOmRlbGV0ZSIsImdyYXBoOnJlYWQiLCJncmFwaDp1cGRhdGUiLCJncmFwaDpkZWxldGUiLCJncmFwaDpleHBsb3JlIiwiZ3JhcGg6ZXhwb3J0IiwiY2FudmFzOmFubm90YXRlIiwiY2FudmFzOnBlcnNvbmFsaXplIiwiZGFzaGJvYXJkOnJlYWQiLCJkYXNoYm9hcmQ6dXBkYXRlIiwiY2FudmFzOnNoYXBlIl0sImdfdGlkX3BhcnNlcl9zb3VyY2UiOiJjc3YiLCJnX3RpZF9mZWF0dXJlX2FkZF9vbnMiOlsiYXNzaXN0YW50Il0sImdfYXZhdGFyIjoiMDIiLCJpc3MiOiJodHRwczovL2Nsb3VkLmdlbWluaWRhdGEuY29tIiwic3ViIjoiNmE0M2EwZWYwNzYzZGUwMDJkMjdlNWNjIiwiYXVkIjoiaHR0cHM6Ly9jbG91ZC5nZW1pbmlkYXRhLmNvbSIsImV4cCI6NDg2NjcwNTI4MiwiaWF0IjoxNzg0Mjc2MjcxLCJuaWNrbmFtZSI6Im1lbWJlcjMzQDIwMjZzZWkuY29tIiwiZW1haWwiOiJtZW1iZXIzM0AyMDI2c2VpLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZX0.MjBaj8c88E3EF5SoDW3axlQvzbiigyViP82hRqRNIuA';
+
+    const getHeaders = () => ({
+      'Authorization': 'Bearer ' + JWT_TOKEN,
+      'Content-Type': 'application/json'
+    });
+
+    let chatList = [];
+    let vectorKnowledgeFiles = [];
+    let activeChatId = null;
+    let activeCaseId = null;
+
+    // Mock databases
+    const caseDb = {
+      'C-20231015-001': {
+        id: 'C-20231015-001',
+        applicant: '張○○（62歲）',
+        status: '審查中',
+        badgeClass: 'badge-review',
+        type: '金融消費爭議 (投資型商品)',
+        item: '理專涉嫌違反告知義務與未詳盡揭露風險',
+        amount: 'NT$ 350,000',
+        created: '2023-10-15',
+        updated: '2023-11-02',
+        summary: [
+          '申請人指稱理專推薦購買外幣投資型保單時，強調「保本且固定配息 6%」，未充分揭露匯率波動及商品本金虧損之風險。',
+          '申請人表示其為保守型投資人，該保單之風險等級為 High，明顯與其風險屬性不符，理專涉有過失。',
+          '業者答辯稱商品說明書已由申請人簽名並聲明充分瞭解風險，且有電話回訪錄音。'
+        ],
+        laws: [
+          {
+            title: '金融消費者保護法第 9 條',
+            desc: '金融服務業與金融消費者訂立契約前，應充分瞭解金融消費者之相關資料，以確保該商品或服務對金融消費者之適合度。'
+          },
+          {
+            title: '金融消費者保護法第 10 條',
+            desc: '金融服務業應向金融消費者充分說明金融商品之重要內容及風險，並進行風險揭露。說明義務應以金融消費者能理解之方式為之。'
+          },
+          {
+            title: '民法第 184 條',
+            desc: '因故意或過失，不法侵害他人之權利者，負損害賠償責任。故意以背於善良風俗之方法加損害於他人者亦同。'
+          }
+        ],
+        initialResponse: '「合規小精靈」已為您分析完畢。此案件重點在於**理專是否涉嫌違反《金保法》之「適合度原則」與「充分說明義務」**。\n\n根據錄音與文件比對：\n1. 客戶風險屬性評估表防線為「保守型」，但銷售之保單為高風險商品，適合度分析顯有缺失。\n2. 理專在解說過程中，僅口頭強調「每月配息 6%」，並未充分提及淨值波動與匯損可能導致本金虧損。\n\n建議下一步可朝向**「適合度不符與說明不足之比例責任」**進行和解評估。'
+      },
+      'C-20231102-005': {
+        id: 'C-20231102-005',
+        applicant: '李○○（34歲）',
+        status: '進行中',
+        badgeClass: 'badge-progress',
+        type: '保險給付爭議 (醫療保險)',
+        item: '日間住院實支實付理賠遭拒',
+        amount: 'NT$ 84,000',
+        created: '2023-11-02',
+        updated: '2023-11-03',
+        summary: [
+          '申請人因憂鬱症於精神科醫院接受「日間住院」治療，共計 28 天，向保險公司申請每日住院醫療保險金。',
+          '保險公司拒絕理賠，主張保險契約約定之「住院」定義需為「辦理住院手續且確實在醫院接受治療者」，日間住院並未過夜留宿。',
+          '申請人抗辯日間住院亦屬醫師專業診斷所需之實質治療，應予以給付。'
+        ],
+        laws: [
+          {
+            title: '保險法第 54-1 條',
+            desc: '保險契約之解釋，應探求當事人之真意，不得拘泥於所用之文字；如有疑義時，以作有利於被保險人之解釋為原則。'
+          },
+          {
+            title: '保險法第 131 條',
+            desc: '傷害保險人於被保險人遭受意外傷害及其所致殘廢或死亡時，負給付保險金額之責。前項意外傷害，指非由疾病引起之外來突發事故。'
+          },
+          {
+            title: '精神衛生法第 35 條',
+            desc: '精神醫療機構提供病人精神醫療服務，包含門診、急診、全日住院、半日住院、日間留院、夜間留院等方式。'
+          }
+        ],
+        initialResponse: '「合規小精靈」分析結果：本案涉及**「日間住院」是否屬於保險合約約定之住院給付範疇**。\n\n1. 保險契約內條文並未明文排除「日間住院」，依據**《保險法》第 54-1 條之疑義利益歸於被保險人原則**，拒賠立場相對薄弱。\n2. 精神科治療實務中，日間留院係屬《精神衛生法》規定之正規精神醫療方式。\n\n建議合規評估意見：**本案保險公司敗訴風險較高，建議予以理賠或進行合理比例之通融給付**。'
+      }
+    };
+
+    // Initialize API functions on load
+    async function initApi() {
+      await fetchChatSessions();
+      await fetchKnowledgeBase();
+      initUploadZone();
+    }
+
+    // Automatically grow prompt input textarea based on user input height
+    function autoGrow(el) {
+      el.style.height = '48px';
+      const newHeight = Math.min(el.scrollHeight, 180);
+      el.style.height = newHeight + 'px';
+    }
+
+    // Drag & Drop event bindings on load
+    function initUploadZone() {
+      const dropzone = document.getElementById('upload-zone');
+      if (!dropzone) return;
+      
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropzone.classList.add('dragover');
+        }, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropzone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropzone.classList.remove('dragover');
+        }, false);
+      });
+
+      dropzone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0) {
+          handleFile(files[0]);
+        }
+      }, false);
+    }
+
+    // Handle manual file upload selection
+    async function handleFileSelect(e) {
+      const files = e.target.files;
+      if (files.length > 0) {
+        await handleFile(files[0]);
+      }
+    }
+
+    // Handle case file upload and details parsing
+    async function handleFile(file) {
+      appendSystemMessage(`系統偵測到案件檔案上傳：<b>${file.name}</b>。正在將檔案寫入向量知識庫...`);
+      
+      let uploadSucceeded = false;
+      let remoteFilePath = '';
+      
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const uploadRes = await fetch(`${API_BASE}/import/uploads`, {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + JWT_TOKEN
+          },
+          body: formData
+        });
+        
+        if (uploadRes.ok) {
+          const resData = await uploadRes.json();
+          remoteFilePath = resData.path || resData.file_path || '';
+          uploadSucceeded = true;
+          appendSystemMessage(`雲端上傳成功，正啟動 RAG 向量知識庫切片流程...`);
+          
+          await fetch(`${API_BASE}/import/vector/knowledge`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify({
+              title: file.name,
+              file_name: file.name,
+              file_path: remoteFilePath
+            })
+          });
+          
+          await fetchKnowledgeBase();
+        }
+      } catch (err) {
+        console.warn('API upload error, using local fallback parser:', err);
+      }
+
+      // Fallback local case generation based on file name details
+      const caseId = 'C-UPL-' + Math.floor(Math.random() * 90000 + 10000);
+      let applicantName = '陳○○';
+      let disputeItem = '理賠範圍爭議與說明義務瑕疵';
+      let disputeType = '金融消費爭議 (一般商品)';
+      
+      const cleanName = file.name.replace(/\.[^/.]+$/, ""); 
+      const parts = cleanName.split('_');
+      if (parts.length >= 2) {
+        applicantName = parts[0];
+        disputeItem = parts[1];
+      } else if (cleanName.includes('張')) {
+        applicantName = '張○○';
+      } else if (cleanName.includes('李')) {
+        applicantName = '李○○';
+      } else if (cleanName.includes('王')) {
+        applicantName = '王○○';
+      }
+      
+      if (cleanName.includes('住院') || cleanName.includes('保險') || cleanName.includes('醫療')) {
+        disputeType = '保險給付爭議 (醫療保險)';
+      } else if (cleanName.includes('理專') || cleanName.includes('投資') || cleanName.includes('基金')) {
+        disputeType = '金融消費爭議 (投資型商品)';
+      }
+
+      caseDb[caseId] = {
+        id: caseId,
+        applicant: applicantName,
+        status: '審查中',
+        badgeClass: 'badge-review',
+        type: disputeType,
+        item: disputeItem,
+        amount: 'NT$ 120,000 (預估)',
+        created: new Date().toISOString().split('T')[0],
+        updated: new Date().toISOString().split('T')[0],
+        summary: [
+          `本案為使用者透過文件 [${file.name}] 即時上傳建立。`,
+          `系統已解析檔案，偵測關係人為 [${applicantName}]，涉案核心要點為 [${disputeItem}]。`,
+          `已為本檔案建立對應之雲端協作 RAG Chat 對話工作區。`
+        ],
+        laws: [
+          {
+            title: '金融消費者保護法第 10 條',
+            desc: '金融服務業應向金融消費者充分說明金融商品之重要內容及風險，並進行風險揭露。'
+          },
+          {
+            title: '保險法第 54-1 條',
+            desc: '保險契約如有疑義時，以作有利於被保險人之解釋為原則。'
+          }
+        ],
+        initialResponse: `「合規小精靈」已針對您上傳的自訂案件 **${file.name}** (案號 ${caseId}) 完成向量解構。\n\n根據上傳卷宗，涉案當事人 **${applicantName}** 主張其受有合規損害（爭議項目：${disputeItem}）。\n\n建議您可以直接在下方詢問此案的合規瑕疵細節，或要求生成答辯意見書草稿。`
+      };
+
+      document.getElementById('case-search').value = caseId;
+      await triggerSearch();
+    }
+
+    // Create custom case from manual input form
+    async function createCustomCaseFromForm() {
+      const applicant = document.getElementById('form-applicant').value.trim() || '自訂申請人';
+      const type = document.getElementById('form-type').value;
+      const item = document.getElementById('form-item').value.trim() || '未填寫爭議要點';
+      const amount = document.getElementById('form-amount').value.trim() || 'NT$ 0';
+
+      const caseId = 'C-NEW-' + Math.floor(Math.random() * 90000 + 10000);
+      
+      caseDb[caseId] = {
+        id: caseId,
+        applicant: applicant,
+        status: '進行中',
+        badgeClass: 'badge-progress',
+        type: type,
+        item: item,
+        amount: amount,
+        created: new Date().toISOString().split('T')[0],
+        updated: new Date().toISOString().split('T')[0],
+        summary: [
+          `本案件由合規專員於系統上手動輸入建立。`,
+          `關係當事人：${applicant}。`,
+          `主要爭議標的與要點：${item}，涉案總金額：${amount}。`
+        ],
+        laws: [
+          {
+            title: '金融消費者保護法第 9 條',
+            desc: '金融服務業與金融消費者訂立契約前，應充分瞭解金融消費者之適合度。'
+          }
+        ],
+        initialResponse: `「合規小精靈」已建立手動輸入案件 **${caseId}**。\n\n關係當事人：${applicant}\n爭議項目：${item}\n\n已連結雲端 RAG 後端，您現在可以直接詢問與此自訂案件相關的金融合規分析。`
+      };
+
+      document.getElementById('case-search').value = caseId;
+      await triggerSearch();
+    }
+
+    // Reset workspace to uploader empty state
+    function resetWorkspace() {
+      activeCaseId = null;
+      activeChatId = null;
+      document.getElementById('case-search').value = '';
+      
+      document.getElementById('sidebar-empty').style.display = 'flex';
+      document.getElementById('sidebar-card').style.display = 'none';
+      
+      document.getElementById('chat-empty').style.display = 'flex';
+      document.getElementById('chat-container').style.display = 'none';
+      document.getElementById('chat-container').innerHTML = '';
+      
+      document.getElementById('form-applicant').value = '';
+      document.getElementById('form-item').value = '';
+      document.getElementById('form-amount').value = '';
+      renderLawsSidebar(null);
+    }
+
+    // Fetch chat sessions list
+    async function fetchChatSessions() {
+      try {
+        const res = await fetch(`${API_BASE}/chat/list`, {
+          headers: getHeaders()
+        });
+        if (res.ok) {
+          chatList = await res.json();
+        }
+      } catch (err) {
+        console.error('Error fetching chat sessions:', err);
+      }
+    }
+
+    // Fetch Knowledge Base files and render in panel
+    async function fetchKnowledgeBase() {
+      try {
+        const res = await fetch(`${API_BASE}/import/vector/knowledge`, {
+          headers: getHeaders()
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.knowledge) {
+            vectorKnowledgeFiles = data.knowledge;
+            renderLawsSidebar(caseDb[activeCaseId]);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading knowledge files:', err);
+      }
+    }
+
+    function renderLawsSidebar(matchedCase) {
+      const container = document.getElementById('sidebar-laws-list');
+      if (!container) return;
+      container.innerHTML = '';
+
+      // 1. Render Case-Specific Laws first (if case is loaded)
+      if (matchedCase && matchedCase.laws && matchedCase.laws.length > 0) {
+        const titleEl = document.createElement('div');
+        titleEl.style.fontSize = '0.72rem';
+        titleEl.style.fontWeight = 'bold';
+        titleEl.style.color = 'var(--accent-gold-dark)';
+        titleEl.style.margin = '0.5rem 0';
+        titleEl.textContent = '📌 案卷建議法規';
+        container.appendChild(titleEl);
+
+        matchedCase.laws.forEach(law => {
+          const item = document.createElement('div');
+          item.className = 'law-item';
+          item.onclick = () => insertCitation(law.title);
+          item.innerHTML = `
+            <div class="law-title">
+              <span>⚖️ ${law.title}</span>
+              <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="12" height="12">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </div>
+            <div class="law-desc">${law.desc}</div>
+          `;
+          container.appendChild(item);
+        });
+      }
+
+      // 2. Render Cloud Vector Knowledge Base files
+      if (vectorKnowledgeFiles && vectorKnowledgeFiles.length > 0) {
+        const titleEl = document.createElement('div');
+        titleEl.style.fontSize = '0.72rem';
+        titleEl.style.fontWeight = 'bold';
+        titleEl.style.color = 'var(--accent-blue)';
+        titleEl.style.margin = '0.75rem 0 0.5rem 0';
+        titleEl.textContent = '📚 雲端知識庫文檔 (RAG)';
+        container.appendChild(titleEl);
+
+        vectorKnowledgeFiles.forEach(k => {
+          const item = document.createElement('div');
+          item.className = 'law-item';
+          const cleanTitle = k.title || k.file_name;
+          const shortName = k.file_name.replace('.pdf', '');
+          item.onclick = () => insertCitation(shortName);
+          item.innerHTML = `
+            <div class="law-title">
+              <span>⚖️ ${cleanTitle}</span>
+              <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" width="12" height="12">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+            </div>
+            <div class="law-desc">${k.summary || '點選以引用此法規條文。'}</div>
+          `;
+          container.appendChild(item);
+        });
+      }
+
+      if (container.children.length === 0) {
+        container.innerHTML = '<div style="font-size:0.75rem; color:var(--text-muted); padding:0.5rem 0;">尚未載入法規文檔</div>';
+      }
+    }
+
+    // Load messages history for a chat
+    async function loadChatMessages(chatId) {
+      try {
+        const res = await fetch(`${API_BASE}/chat/${chatId}/messages`, {
+          headers: getHeaders()
+        });
+        if (!res.ok) throw new Error('Load messages failed');
+        
+        const messages = await res.json();
+        const chatContainer = document.getElementById('chat-container');
+        chatContainer.innerHTML = '';
+        
+        appendSystemMessage(`已同步雲端 API 會話紀錄。`);
+
+        if (messages && messages.length > 0) {
+          messages.forEach(msg => {
+            const role = msg.role || msg.speaker;
+            const text = msg.text || msg.content || '';
+            if (role === 'user') {
+              appendUserMessage(text);
+            } else if (text) {
+              const stream = document.getElementById('chat-container');
+              const row = document.createElement('div');
+              row.className = 'message-row assistant';
+              row.innerHTML = `
+                <div class="message-avatar">AI</div>
+                <div class="message-bubble">${formatMessageText(text)}</div>
+              `;
+              stream.appendChild(row);
+              scrollChatToBottom();
+            }
+          });
+        } else {
+          const matchedCase = caseDb[activeCaseId];
+          if (matchedCase) {
+            simulateAiResponse(matchedCase.initialResponse);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading historical messages:', err);
+        const matchedCase = caseDb[activeCaseId];
+        if (matchedCase) {
+          simulateAiResponse(matchedCase.initialResponse);
+        }
+      }
+    }
+
+    // Create a new chat session
+    async function createChatSession(caseId, initialPrompt) {
+      try {
+        const createRes = await fetch(`${API_BASE}/chat/create`, {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify({})
+        });
+        if (!createRes.ok) throw new Error('Create session failed');
+        const createData = await createRes.json();
+        const chatId = createData.insertedId;
+        activeChatId = chatId;
+
+        await fetch(`${API_BASE}/chat/${chatId}/update`, {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify({ title: caseId })
+        });
+
+        await fetchChatSessions();
+        appendSystemMessage(`已建立雲端 RAG 協作專案。`);
+        
+        setTimeout(() => {
+          simulateAiResponse(initialPrompt);
+        }, 600);
+      } catch (err) {
+        console.error('Error creating live chat:', err);
+        activeChatId = 'mock_chat_' + caseId;
+        appendSystemMessage(`連線 API 異常，已啟動本地模擬工作區。`);
+        setTimeout(() => {
+          simulateAiResponse(initialPrompt);
+        }, 600);
+      }
+    }
+
+    function formatMessageText(text) {
+      if (!text) return '';
+      text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/^### (.*?)$/gm, '<h4 style="margin: 0.5rem 0 0.2rem 0; color: var(--accent-gold-dark);">$1</h4>');
+      text = text.replace(/^## (.*?)$/gm, '<h3 style="margin: 0.75rem 0 0.3rem 0; color: var(--accent-blue);">$1</h3>');
+      text = text.split('\n').map(line => {
+        if (line.startsWith('1. ') || line.startsWith('2. ') || line.startsWith('3. ') || line.startsWith('4. ')) {
+          return `<div style="margin-left: 0.8rem; margin-top: 0.2rem;">${line}</div>`;
+        }
+        if (line.trim().startsWith('* ')) {
+          return `<div style="margin-left: 0.8rem; margin-top: 0.2rem; display: flex; gap: 0.35rem;"><span style="color: var(--accent-gold);">•</span><span>${line.trim().substring(2)}</span></div>`;
+        }
+        return line;
+      }).join('\n');
+      return text.replace(/\n/g, '<br>');
+    }
+
+    function setSearch(caseId) {
+      document.getElementById('case-search').value = caseId;
+      triggerSearch();
+    }
+
+    async function triggerSearch() {
+      const q = document.getElementById('case-search').value.trim();
+      if (!q) return;
+      const matchedCase = caseDb[q];
+
+      if (matchedCase) {
+        activeCaseId = q;
+        document.getElementById('sidebar-empty').style.display = 'none';
+        const card = document.getElementById('sidebar-card');
+        card.style.display = 'block';
+
+        document.getElementById('case-id').textContent = matchedCase.id;
+        document.getElementById('case-applicant').textContent = matchedCase.applicant;
+        document.getElementById('case-type').textContent = matchedCase.type;
+        document.getElementById('case-item').textContent = matchedCase.item;
+        document.getElementById('case-amount').textContent = matchedCase.amount;
+        document.getElementById('case-created').textContent = matchedCase.created;
+        document.getElementById('case-updated').textContent = matchedCase.updated;
+
+        const statusBadge = document.getElementById('case-badge-status');
+        statusBadge.textContent = matchedCase.status;
+        statusBadge.className = 'case-badge ' + matchedCase.badgeClass;
+
+        renderLawsSidebar(matchedCase);
+
+        const summaryContainer = document.getElementById('sidebar-summary-list');
+        summaryContainer.innerHTML = '';
+        matchedCase.summary.forEach(point => {
+          const bullet = document.createElement('div');
+          bullet.className = 'summary-bullet';
+          bullet.innerHTML = `<span class="summary-text">${point}</span>`;
+          summaryContainer.appendChild(bullet);
+        });
+
+        document.getElementById('chat-empty').style.display = 'none';
+        const chatContainer = document.getElementById('chat-container');
+        chatContainer.style.display = 'flex';
+        chatContainer.innerHTML = ''; 
+        appendSystemMessage(`已載入案件 ${matchedCase.id}。AI 分析工作區準備就緒。`);
+
+        let existingChat = chatList.find(c => c.title === matchedCase.id);
+        if (existingChat) {
+          activeChatId = existingChat._id;
+          await loadChatMessages(activeChatId);
+        } else {
+          await createChatSession(matchedCase.id, matchedCase.initialResponse);
+        }
+      } else {
+        alert('無此測試案件，請輸入 C-20231015-001 或 C-20231102-005 進行試用。');
+      }
+    }
+
+    function toggleSection(id, headerEl) {
+      const el = document.getElementById(id);
+      if (el.style.display === 'none' || el.style.maxHeight === '0px') {
+        el.style.display = 'flex';
+        el.style.maxHeight = '500px';
+        headerEl.classList.remove('collapsed');
+      } else {
+        el.style.maxHeight = '0px';
+        setTimeout(() => { el.style.display = 'none'; }, 300);
+        headerEl.classList.add('collapsed');
+      }
+    }
+
+    function appendSystemMessage(text) {
+      const stream = document.getElementById('chat-container');
+      const row = document.createElement('div');
+      row.className = 'message-row system';
+      row.innerHTML = `<div class="message-bubble">${text}</div>`;
+      stream.appendChild(row);
+      scrollChatToBottom();
+    }
+
+    function appendUserMessage(text) {
+      const stream = document.getElementById('chat-container');
+      const row = document.createElement('div');
+      row.className = 'message-row user';
+      row.innerHTML = `
+        <div class="message-avatar">用</div>
+        <div class="message-bubble">${formatMessageText(text)}</div>
+      `;
+      stream.appendChild(row);
+      scrollChatToBottom();
+    }
+
+    function simulateAiResponse(responseText) {
+      const stream = document.getElementById('chat-container');
+      const row = document.createElement('div');
+      row.className = 'message-row assistant';
+      row.innerHTML = `
+        <div class="message-avatar">AI</div>
+        <div class="message-bubble" id="typing-bubble">
+          <div class="typing-loader"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
+        </div>
+      `;
+      stream.appendChild(row);
+      scrollChatToBottom();
+
+      setTimeout(() => {
+        const bubble = document.getElementById('typing-bubble');
+        if (bubble) {
+          bubble.removeAttribute('id');
+          bubble.innerHTML = '';
+          let index = 0;
+          const speed = 15;
+          function typeWriter() {
+            if (index < responseText.length) {
+              const sliceSize = responseText.substr(index, 3);
+              bubble.innerHTML += sliceSize;
+              index += 3;
+              bubble.innerHTML = formatMessageText(bubble.innerText);
+              scrollChatToBottom();
+              setTimeout(typeWriter, speed);
+            }
+          }
+          typeWriter();
+        }
+      }, 800);
+    }
+
+    function insertCitation(lawTitle) {
+      const promptInput = document.getElementById('prompt-input');
+      promptInput.value = `請幫我分析本案中，是否有與 ${lawTitle} 相關的合規疑慮或前例？ `;
+      promptInput.focus();
+    }
+
+    function useQuickPrompt(promptText) {
+      document.getElementById('prompt-input').value = promptText;
+      handleSendText();
+    }
+
+    async function askAiToAnalyzeCase() {
+      if (!activeCaseId) return;
+      appendUserMessage('啟動對此案的深入適法性評估分析。');
+      
+      const promptText = '請針對本案細節，啟動深入的適法性評估與合規風險分析。';
+      
+      if (!activeChatId || activeChatId.startsWith('mock_chat_')) {
+        setTimeout(() => {
+          simulateAiResponse('正在調取關聯案件司法判決書與金評會裁決書...\n\n經查，本件爭議涉及銷售投資型商品。金評會類似裁決（如 110 年評字第 124 號）指出，業者若無法舉證其於業務員推介時已詳實揭露主要投資風險及匯率折算要點，即應認定未盡金保法第 10 條之說明義務。\n\n本案評估意見：**業者合規瑕疵明確度高，建議先行向消費者協議 30%~50% 金額之補償和解。**');
+        }, 600);
+        return;
+      }
+
+      await sendQuestionToApi(promptText);
+    }
+
+    // Send input logic
+    async function handleSendText() {
+      const promptInput = document.getElementById('prompt-input');
+      const text = promptInput.value.trim();
+      if (!text) return;
+
+      if (!activeCaseId) {
+        // Bootstrap a text-based custom case dynamically
+        const bootText = text;
+        const caseId = 'C-TXT-' + Math.floor(Math.random() * 90000 + 10000);
+        
+        let disputeType = '金融消費爭議 (一般商品)';
+        if (bootText.includes('住院') || bootText.includes('醫療') || bootText.includes('保險')) {
+          disputeType = '保險給付爭議 (醫療險)';
+        } else if (bootText.includes('理專') || bootText.includes('基金') || bootText.includes('投資')) {
+          disputeType = '金融消費爭議 (投資型商品)';
+        }
+
+        const guessedItem = bootText.length > 25 ? bootText.substring(0, 25) + '...' : bootText;
+
+        caseDb[caseId] = {
+          id: caseId,
+          applicant: '文字自訂當事人',
+          status: '分析中',
+          badgeClass: 'badge-progress',
+          type: disputeType,
+          item: guessedItem,
+          amount: '依案文而定',
+          created: new Date().toISOString().split('T')[0],
+          updated: new Date().toISOString().split('T')[0],
+          summary: [
+            `由合規專員於對話框中直接輸入文字案情建立。`,
+            `輸入原始敘述："${bootText.substring(0, 60)}..."`
+          ],
+          laws: [
+            {
+              title: '金融消費者保護法第 9 條',
+              desc: '金融服務業與金融消費者訂立契約前，應充分瞭解金融消費者，以確保商品適合度。'
+            }
+          ],
+          initialResponse: '「合規小精靈」已接收到您的文字案例，已自動建立新會話，正在為您送出合規分析...'
+        };
+
+        // Clear search field, prompt field and load case
+        document.getElementById('case-search').value = caseId;
+        promptInput.value = '';
+        promptInput.style.height = '48px';
+        
+        await triggerSearch(); // this triggers chat creation and loads it
+        
+        // Wait briefly for triggerSearch to create session then send question
+        setTimeout(async () => {
+          appendUserMessage(bootText);
+          await sendQuestionToApi(bootText);
+        }, 1200);
+        
+        return;
+      }
+
+      appendUserMessage(text);
+      promptInput.value = '';
+      promptInput.style.height = '48px';
+
+      if (!activeChatId || activeChatId.startsWith('mock_chat_')) {
+        let mockReply = '已收到您的問題。正在檢索本案卷宗與法學知識庫...\n\n針對您的提問「' + text + '」，合規精靈建議：\n\n1. 應重新調閱專員與客戶的通聯記錄或臨櫃錄影。\n2. 對照同類型商品爭議之金評會判定，我方應在答辯書中強調客戶已簽署之風險預告書條款，但需防範法官引用《金保法》適合度漏洞。';
+        if (text.includes('報告') || text.includes('報告草稿')) {
+          mockReply = '## 金融消費爭議案件合規審查意見書 (草稿)\n\n*   **案號**：' + activeCaseId + '\n*   **審查重點**：' + caseDb[activeCaseId].item + '\n\n### ⚖️ 合規性判定\n根據現有事證，本案評估有顯著合規疏失風險，主要集中於適合度規範之落實與風險揭露聲明是否被口頭承諾所架空。\n\n### 💡 行動方案指引\n1. **協議和解**：爭取於評議程序前取得和解。\n2. **合規宣導**：加強前線理專之風險告知抽查比率。';
+        }
+        setTimeout(() => {
+          simulateAiResponse(mockReply);
+        }, 700);
+        return;
+      }
+
+      await sendQuestionToApi(text);
+    }
+
+    // API Post implementation helper
+    async function sendQuestionToApi(questionText) {
+      const stream = document.getElementById('chat-container');
+      
+      // Add temporary typing loader row
+      const loaderRow = document.createElement('div');
+      loaderRow.className = 'message-row assistant';
+      loaderRow.innerHTML = `
+        <div class="message-avatar">AI</div>
+        <div class="message-bubble" id="typing-bubble">
+          <div class="typing-loader">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+      `;
+      stream.appendChild(loaderRow);
+      scrollChatToBottom();
+
+      try {
+        const response = await fetch(`${API_BASE}/chat/${activeChatId}`, {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify({ question: questionText })
+        });
+
+        // Remove loader bubble
+        const loader = document.getElementById('typing-bubble');
+        if (loader) {
+          loader.parentElement.remove();
+        }
+
+        if (!response.ok) throw new Error('API Error: ' + response.status);
+
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('text/event-stream')) {
+          // SSE Stream reader
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder('utf-8');
+          let done = false;
+
+          const newRow = document.createElement('div');
+          newRow.className = 'message-row assistant';
+          newRow.innerHTML = `
+            <div class="message-avatar">AI</div>
+            <div class="message-bubble" id="streaming-bubble"></div>
+          `;
+          stream.appendChild(newRow);
+          scrollChatToBottom();
+          const bubble = document.getElementById('streaming-bubble');
+          bubble.removeAttribute('id');
+
+          let fullText = '';
+          while (!done) {
+            const { value, done: readerDone } = await reader.read();
+            done = readerDone;
+            if (value) {
+              const chunk = decoder.decode(value, { stream: !done });
+              const lines = chunk.split('\n');
+              for (let line of lines) {
+                line = line.trim();
+                if (line.startsWith('data:')) {
+                  const dataStr = line.slice(5).trim();
+                  if (dataStr === '[DONE]') continue;
+                  try {
+                    const parsed = JSON.parse(dataStr);
+                    const word = parsed.choices?.[0]?.delta?.content || parsed.text || parsed.answer || parsed.content || '';
+                    fullText += word;
+                    bubble.innerHTML = formatMessageText(fullText);
+                    scrollChatToBottom();
+                  } catch (e) {
+                    if (dataStr) {
+                      fullText += dataStr;
+                      bubble.innerHTML = formatMessageText(fullText);
+                      scrollChatToBottom();
+                    }
+                  }
+                }
+              }
+            }
+          }
+        } else {
+          // Regular JSON payload
+          const resJson = await response.json();
+          const reply = resJson.answer || resJson.reply || resJson.content || resJson.response || resJson.text || JSON.stringify(resJson);
+          simulateAiResponse(reply);
+        }
+      } catch (err) {
+        console.error('Live API Query failed:', err);
+        const loader = document.getElementById('typing-bubble');
+        if (loader) {
+          loader.parentElement.remove();
+        }
+        
+        // Notify fallback and run local mock reply
+        appendSystemMessage(`API 連線逾時，自動切換至本地專家大模型模擬解答。`);
+        let mockReply = '已收到您的問題。正在檢索本案卷宗與法學知識庫...\n\n針對您的提問「' + questionText + '」，合規精靈建議：\n\n1. 應重新調閱專員與客戶的通聯記錄或臨櫃錄影。\n2. 對照同類型商品爭議之金評會判定，我方應在答辯書中強調客戶已簽署之風險預告書條款，但需防範法官引用《金保法》適合度漏洞。';
+        if (questionText.includes('報告') || questionText.includes('報告草稿')) {
+          mockReply = '## 金融消費爭議案件合規審查意見書 (草稿)\n\n*   **案號**：' + activeCaseId + '\n*   **審查重點**：' + caseDb[activeCaseId].item + '\n\n### ⚖️ 合規性判定\n根據現有事證，本案評估有顯著合規疏失風險，主要集中於適合度規範之落實與風險揭露聲明是否被口頭承諾所架空。\n\n### 💡 行動方案指引\n1. **協議和解**：爭取於評議程序前取得和解。\n2. **合規宣導**：加強前線理專之風險告知抽查比率。';
+        }
+        setTimeout(() => {
+          simulateAiResponse(mockReply);
+        }, 600);
+      }
+    }
+
+    function checkSubmit(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleSendText();
+      }
+    }
+
+    // Trigger PDF Export simulation
+    function triggerExport() {
+      if (!activeCaseId) {
+        alert('請先載入案件。');
+        return;
+      }
+      const toast = document.getElementById('toast-notify');
+      toast.style.display = 'block';
+
+      setTimeout(() => {
+        toast.style.display = 'none';
+        
+        // Export file simulated
+        const matchedCase = caseDb[activeCaseId];
+        const exportData = {
+          exportType: 'Compliance Analysis Report',
+          caseId: matchedCase.id,
+          applicant: matchedCase.applicant,
+          type: matchedCase.type,
+          summaryPoints: matchedCase.summary,
+          lawsCited: matchedCase.laws.map(l => l.title),
+          generatedAt: new Date().toLocaleString()
+        };
+
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Compliance_Report_${matchedCase.id}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }, 1500);
+    }
+
+    function scrollChatToBottom() {
+      const scroller = document.getElementById('chat-scroller');
+      scroller.scrollTop = scroller.scrollHeight;
+    }
+
+    // Initialize UI and API variables
+    window.onload = initApi;
+  </script>
+</body>
+</html>

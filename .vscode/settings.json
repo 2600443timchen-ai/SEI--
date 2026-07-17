@@ -1,0 +1,7 @@
+{
+  "liveServer.settings.proxy": {
+    "enable": true,
+    "baseUri": "/geminidata_api",
+    "proxyUri": "https://cloud.geminidata.com/api"
+  }
+}

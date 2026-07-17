@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>合規精靈 Compliance Assistant - 智能金融消費爭議解決方案</title>
+  <meta name="description" content="合規精靈（Compliance Assistant）專為金融消費爭議設計，結合 AI 法規查詢、案件分析與法規引用，為您打造極致高效的工作台體驗。">
+  
+  <!-- Modern Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-light: #F8FAFC;
+      --accent-gold: #C5A059;
+      --accent-gold-dark: #A37E3A;
+      --accent-blue: #1E3A8A;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --glass-bg: rgba(255, 255, 255, 0.85);
+      --glass-border: rgba(197, 160, 89, 0.2);
+      --radius-pill: 9999px;
+      --radius-card: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-light);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    /* Ambient Background Orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(130px);
+      z-index: 1;
+      opacity: 0.22;
+    }
+    .orb-gold {
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(197, 160, 89, 0.4) 0%, transparent 70%);
+      top: -80px;
+      left: -80px;
+      animation: drift 18s infinite alternate ease-in-out;
+    }
+    .orb-blue {
+      width: 550px;
+      height: 550px;
+      background: radial-gradient(circle, rgba(30, 58, 138, 0.25) 0%, transparent 70%);
+      bottom: -120px;
+      right: -80px;
+      animation: drift 22s infinite alternate-reverse ease-in-out;
+    }
+
+    @keyframes drift {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(40px, 30px) scale(1.08); }
+    }
+
+    /* Landing Card Container */
+    .landing-container {
+      position: relative;
+      z-index: 2;
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-card);
+      width: 90%;
+      max-width: 520px;
+      padding: 3.5rem 2.5rem;
+      box-shadow: 0 30px 60px -15px rgba(30, 41, 59, 0.08), 
+                  0 10px 30px -15px rgba(197, 160, 89, 0.15);
+      text-align: center;
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Logo Brand Title */
+    .brand-logo {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    .brand-logo svg {
+      width: 44px;
+      height: 44px;
+      margin-right: 0.75rem;
+      filter: drop-shadow(0 4px 10px rgba(197, 160, 89, 0.25));
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #1E293B 20%, #475569 80%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle-en {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent-gold);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle-zh {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-bottom: 2rem;
+    }
+
+    /* Dividers and Features */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(197, 160, 89, 0.25) 20%, rgba(197, 160, 89, 0.25) 80%, transparent);
+      margin: 1.75rem 0;
+    }
+
+    .features-list {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.25rem;
+    }
+
+    .feature-tag {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #334155;
+      background: rgba(197, 160, 89, 0.05);
+      border: 1px solid rgba(197, 160, 89, 0.18);
+      padding: 0.5rem 1.1rem;
+      border-radius: var(--radius-pill);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.3s;
+    }
+    .feature-tag:hover {
+      background: rgba(197, 160, 89, 0.1);
+      border-color: var(--accent-gold);
+      transform: translateY(-2px);
+    }
+    .feature-tag::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-gold);
+    }
+
+    /* Call to Action Button */
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      max-width: 280px;
+      padding: 1rem 2rem;
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark));
+      border: none;
+      border-radius: 12px;
+      color: #FFFFFF;
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      box-shadow: 0 10px 20px -5px rgba(197, 160, 89, 0.3);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .cta-btn:hover {
+      box-shadow: 0 15px 25px -3px rgba(197, 160, 89, 0.45);
+      transform: translateY(-3px) scale(1.02);
+    }
+
+    .cta-btn:active {
+      transform: translateY(-1px) scale(0.99);
+    }
+
+    .cta-btn svg {
+      transition: transform 0.3s ease;
+    }
+    .cta-btn:hover svg {
+      transform: translateX(4px);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Light Orbs -->
+  <div class="orb orb-gold"></div>
+  <div class="orb orb-blue"></div>
+
+  <!-- Centered Glass Card -->
+  <main class="landing-container" id="landing-card">
+    <header>
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#grad1)"/>
+          <path d="M2 17L12 22L22 17" stroke="url(#grad2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 12L12 17L22 12" stroke="url(#grad2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="grad1" x1="2" y1="2" x2="22" y2="12" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#C5A059" />
+              <stop offset="100%" stop-color="#1E3A8A" />
+            </linearGradient>
+            <linearGradient id="grad2" x1="2" y1="12" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#C5A059" />
+              <stop offset="100%" stop-color="#1E3A8A" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <p class="subtitle-en">Compliance Assistant</p>
+      <h1>合規精靈</h1>
+      <p class="subtitle-zh">金融消費爭議解決方案</p>
+    </header>
+
+    <div class="divider"></div>
+
+    <!-- Feature badges -->
+    <section class="features-list">
+      <span class="feature-tag">AI 法規查詢</span>
+      <span class="feature-tag">案件分析</span>
+      <span class="feature-tag">法規引用</span>
+    </section>
+
+    <!-- Start Action -->
+    <button class="cta-btn" id="start-btn" onclick="location.href='v2_workspace.html'">
+      開始使用
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </button>
+  </main>
+
+</body>
+</html>
