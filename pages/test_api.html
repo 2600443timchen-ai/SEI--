@@ -29,7 +29,8 @@
   <script>
     const headers = {
       'Authorization': 'Bearer ' + JWT_TOKEN,
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      'x-application-tenant': PROJECT_ID
     };
 
     async function runTest(url, statusElId, resultElId) {

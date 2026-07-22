@@ -2,7 +2,8 @@
 
 const getHeaders = () => ({
   'Authorization': 'Bearer ' + JWT_TOKEN,
-  'Content-Type': 'application/json'
+  'Content-Type': 'application/json',
+  'x-application-tenant': PROJECT_ID
 });
 
 let chatList = [];
@@ -140,7 +141,8 @@ async function handleFile(file) {
     const uploadRes = await fetch(`${API_BASE}/import/uploads`, {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer ' + JWT_TOKEN
+        'Authorization': 'Bearer ' + JWT_TOKEN,
+        'x-application-tenant': PROJECT_ID
       },
       body: formData
     });
