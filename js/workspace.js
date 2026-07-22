@@ -1,9 +1,7 @@
 /* Workspace Page Interactivity and API integration */
 
 const getHeaders = () => ({
-  'Authorization': 'Bearer ' + JWT_TOKEN,
-  'Content-Type': 'application/json',
-  'x-application-tenant': PROJECT_ID
+  'Content-Type': 'application/json'
 });
 
 let chatList = [];
@@ -140,10 +138,6 @@ async function handleFile(file) {
     
     const uploadRes = await fetch(`${API_BASE}/import/uploads`, {
       method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + JWT_TOKEN,
-        'x-application-tenant': PROJECT_ID
-      },
       body: formData
     });
     
