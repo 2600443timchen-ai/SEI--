@@ -1,13 +1,21 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Compliance Genie 合規精靈 - 智能合規工作台</title>
   <meta name="description" content="AI-Native 金融消費爭議合規工作台 - 搜尋、分析、引法、諮詢一體化解決方案">
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 2L2 7L12 12L22 7L12 2Z' fill='url(%23grad1)' /%3E%3Cpath d='M2 17L12 22L22 17' stroke='url(%23grad2)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' /%3E%3Cpath d='M2 12L12 17L22 12' stroke='url(%23grad2)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' /%3E%3Cdefs%3E%3ClinearGradient id='grad1' x1='2' y1='2' x2='22' y2='12' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0%25' stop-color='%23C5A059' /%3E%3Cstop offset='100%25' stop-color='%231E3A8A' /%3E%3C/linearGradient%3E%3ClinearGradient id='grad2' x1='2' y1='12' x2='22' y2='22' gradientUnits='userSpaceOnUse'%3E%3Cstop offset='0%25' stop-color='%23C5A059' /%3E%3Cstop offset='100%25' stop-color='%231E3A8A' /%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E">
 
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+
+  <!-- Markdown Parser -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
   <!-- Cache Control for Dev -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -18,6 +26,7 @@
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/workspace.css?v=2.0">
 </head>
+
 <body>
 
   <!-- Ambient background lighting -->
@@ -28,9 +37,11 @@
   <header>
     <div class="brand-logo" onclick="location.href='../index.html'">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#grad1)"/>
-        <path d="M2 17L12 22L22 17" stroke="url(#grad2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M2 12L12 17L22 12" stroke="url(#grad2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#grad1)" />
+        <path d="M2 17L12 22L22 17" stroke="url(#grad2)" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" />
+        <path d="M2 12L12 17L22 12" stroke="url(#grad2)" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" />
         <defs>
           <linearGradient id="grad1" x1="2" y1="2" x2="22" y2="12" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stop-color="#C5A059" />
@@ -44,7 +55,7 @@
       </svg>
       <h2>Compliance Genie 合規精靈</h2>
     </div>
-    
+
     <div class="header-actions">
       <button class="export-btn" onclick="triggerExport()">
         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -87,22 +98,25 @@
 
   <!-- Main Workspace Grid -->
   <main class="workspace-container">
-    
+
     <!-- Sidebar: Case Info -->
     <aside class="case-sidebar">
       <div class="sidebar-title">案件資訊</div>
-      
+
       <!-- Empty sidebar state (Interactive Uploader & Creator) -->
       <div id="sidebar-empty" style="display: flex; flex-direction: column; gap: 0.5rem; width: 100%;">
-        
+
         <!-- Drag & Drop Zone -->
         <div class="upload-dropzone" id="upload-zone" onclick="document.getElementById('case-file-input').click()">
           <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z">
+            </path>
           </svg>
           <p>拖曳案件 PDF/CSV 至此上傳</p>
           <span>或 點擊此處瀏覽檔案</span>
-          <input type="file" id="case-file-input" style="display: none;" accept=".pdf,.csv,.txt" onchange="handleFileSelect(event)">
+          <input type="file" id="case-file-input" style="display: none;" accept=".pdf,.csv,.txt"
+            onchange="handleFileSelect(event)">
         </div>
 
         <div class="creator-divider">或 手動填寫自訂案件</div>
@@ -147,9 +161,9 @@
             <button class="reset-workspace-btn" onclick="resetWorkspace()">重設會話 ↺</button>
           </div>
         </div>
-        
+
         <div class="card-divider"></div>
-        
+
         <div class="info-grid">
           <div class="info-row">
             <span class="info-label">案件類型</span>
@@ -179,55 +193,78 @@
 
     <!-- Workspace Columns: AI Chat & Law details -->
     <section class="ai-workspace">
-      
+
       <div class="workspace-grid">
-        
+
         <!-- Chat column -->
         <div class="chat-section">
-          
+
           <!-- Chat messages area -->
           <div class="chat-messages-area" id="chat-scroller">
             <!-- Welcome instructions -->
-            <div class="chat-welcome-state" id="chat-empty" style="max-width: 680px; text-align: left; margin: auto; padding: 2rem;">
+            <div class="chat-welcome-state" id="chat-empty"
+              style="max-width: 680px; text-align: left; margin: auto; padding: 2rem;">
               <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
-                <span class="feature-tag" style="background: rgba(197, 160, 89, 0.1); color: var(--accent-gold-dark); border: 1px solid rgba(197, 160, 89, 0.2); font-size: 0.75rem; padding: 0.25rem 0.50rem; border-radius: 4px;">FinTech / LegalTech 應用</span>
+                <span class="feature-tag"
+                  style="background: rgba(197, 160, 89, 0.1); color: var(--accent-gold-dark); border: 1px solid rgba(197, 160, 89, 0.2); font-size: 0.75rem; padding: 0.25rem 0.50rem; border-radius: 4px;">FinTech
+                  / LegalTech 應用</span>
               </div>
-              
-              <h3 style="font-size: 1.75rem; font-family: 'Outfit', sans-serif; color: var(--text-main); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
-                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="width: 32px; height: 32px; color: var(--accent-gold); flex-shrink: 0;">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l3.582-1.791L16.164 21l-.813-5.096c.143-.315.233-.663.233-1.03a3.375 3.375 0 10-6.75 0c0 .367.09.715.233 1.03z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+
+              <h3
+                style="font-size: 1.75rem; font-family: 'Outfit', sans-serif; color: var(--text-main); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"
+                  height="800px" width="800px" version="1.1" id="Layer_1" viewBox="0 0 512 512" xml:space="preserve">
+                  <g>
+                    <g>
+                      <path
+                        d="M256.048,9.633c-50.246,0-91.123,40.878-91.123,91.123c0,29.086,14.044,56.413,37.213,73.464v53.057    c0,9.222,7.477,16.699,16.699,16.699h20.513v8.61c0,9.222,7.477,16.699,16.699,16.699c9.222,0,16.699-7.477,16.699-16.699v-8.61    h20.514c9.222,0,16.699-7.477,16.699-16.699V174.22c23.169-17.052,37.212-44.379,37.212-73.464    C347.172,50.511,306.294,9.633,256.048,9.633z M276.562,210.579h-41.027v-7.762h41.027V210.579z M284.9,150.768    c-9.198,5.32-8.337,14.563-8.337,18.651h-41.027c0-3.798,1.007-13.247-8.337-18.651c-17.811-10.303-28.876-29.466-28.876-50.011    c0-31.831,25.895-57.726,57.726-57.726c31.83,0,57.726,25.895,57.726,57.726C313.774,121.303,302.711,140.465,284.9,150.768z" />
+                    </g>
+                  </g>
+                  <g>
+                    <g>
+                      <path
+                        d="M501.108,327.805c-18.077-22.784-51.249-26.096-73.456-7.46l-79.113,66.383h-37.11    c18.518-7.578,31.898-25.423,32.467-46.178c0.797-29.076-22.488-52.931-51.476-52.931H137.134v-15.706    c0-9.222-7.477-16.699-16.699-16.699H16.699C7.477,255.215,0,262.692,0,271.914v213.754c0,9.222,7.477,16.699,16.699,16.699    h103.736c9.222,0,16.699-7.477,16.699-16.699v-27.328l32.694,27.431c9.007,7.557,20.442,11.718,32.199,11.718h156.499    c11.757,0,23.192-4.161,32.201-11.719l102.571-86.061C514.766,381.693,518.272,349.438,501.108,327.805z M103.736,468.969H33.398    V288.613h70.339C103.736,295.615,103.736,460.353,103.736,468.969z M471.829,374.122l-102.57,86.061    c-3.004,2.519-6.815,3.908-10.735,3.908H202.027c-3.92,0-7.729-1.387-10.733-3.905l-54.16-45.44v-93.728h155.284    c10.112,0,18.373,8.304,18.091,18.618c-0.266,9.693-8.706,17.578-18.815,17.578c-7.262,0-59.114,0-65.688,0    c-9.222,0-16.699,7.477-16.699,16.699c0,9.222,7.477,16.699,16.699,16.699h29.59l25.868,21.703    c6.005,5.037,13.627,7.813,21.466,7.813h45.608c7.841,0,15.465-2.775,21.467-7.814l79.113-66.383    c7.762-6.513,19.426-5.434,25.825,2.634C480.971,356.159,479.574,367.625,471.829,374.122z" />
+                    </g>
+                  </g>
                 </svg>
-                合規精靈 <span style="font-size: 1.25rem; font-weight: 400; color: var(--text-muted);">Compliance Genie</span>
+                合規精靈 <span style="font-size: 1.25rem; font-weight: 400; color: var(--text-muted);">Compliance
+                  Genie</span>
               </h3>
-              
-              <p style="font-size: 0.95rem; font-weight: 500; color: var(--text-main); line-height: 1.6; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px dashed var(--border-color);">
+
+              <p
+                style="font-size: 0.95rem; font-weight: 500; color: var(--text-main); line-height: 1.6; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px dashed var(--border-color);">
                 <strong>核心價值：</strong>透過 AI 技術縮短金融從業人員處理消費爭議的時間，提升合規處理的精確度與效率。
               </p>
 
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem;">
-                <div style="background: rgba(255, 255, 255, 0.4); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-                  <h4 style="font-size: 0.85rem; font-weight: 600; color: #dc2626; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.3rem;">
+                <div
+                  style="background: rgba(255, 255, 255, 0.4); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                  <h4
+                    style="font-size: 0.85rem; font-weight: 600; color: #dc2626; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.3rem;">
                     <span>⚠️ 專案背景與從業痛點</span>
                   </h4>
                   <p style="font-size: 0.78rem; line-height: 1.5; color: var(--text-muted); margin-bottom: 0.6rem;">
                     金融消費爭議涉及龐雜的法規與歷年判決，現行高度依賴個人經驗，查詢極為耗時，面臨以下挑戰：
                   </p>
-                  <ul style="font-size: 0.78rem; line-height: 1.45; color: var(--text-main); padding-left: 1.1rem; margin: 0; display: flex; flex-direction: column; gap: 0.4rem;">
+                  <ul
+                    style="font-size: 0.78rem; line-height: 1.45; color: var(--text-main); padding-left: 1.1rem; margin: 0; display: flex; flex-direction: column; gap: 0.4rem;">
                     <li><strong>查詢門檻高</strong>：需在大量破碎的法規中搜尋正確依據。</li>
                     <li><strong>分析耗時長</strong>：需人工反覆閱讀案件內容並對照法規細節。</li>
                     <li><strong>決策風險大</strong>：因資訊龐雜，可能導致分析判斷的遺漏或不一致。</li>
                   </ul>
                 </div>
 
-                <div style="background: rgba(255, 255, 255, 0.4); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
-                  <h4 style="font-size: 0.85rem; font-weight: 600; color: var(--accent-blue); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.3rem;">
+                <div
+                  style="background: rgba(255, 255, 255, 0.4); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                  <h4
+                    style="font-size: 0.85rem; font-weight: 600; color: var(--accent-blue); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.3rem;">
                     <span>🎯 產品使命 (Mission)</span>
                   </h4>
                   <p style="font-size: 0.78rem; line-height: 1.5; color: var(--text-muted); margin-bottom: 0.6rem;">
                     建置「AI 智慧合規輔助系統」作為數位助手：
                   </p>
-                  <ul style="font-size: 0.78rem; line-height: 1.45; color: var(--text-main); padding-left: 1.1rem; margin: 0; display: flex; flex-direction: column; gap: 0.4rem;">
+                  <ul
+                    style="font-size: 0.78rem; line-height: 1.45; color: var(--text-main); padding-left: 1.1rem; margin: 0; display: flex; flex-direction: column; gap: 0.4rem;">
                     <li><strong>企業 RAG 整合</strong>：整合 LLM 與企業既有知識庫。</li>
                     <li><strong>高效獲取建議</strong>：協助使用者在短時間內獲取精確的法規建議。</li>
                     <li><strong>提升決策品質</strong>：協助完成案件摘要，並進行初步的合規風險評估。</li>
@@ -235,7 +272,8 @@
                 </div>
               </div>
 
-              <div style="text-align: center; background: rgba(197, 160, 89, 0.05); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid rgba(197, 160, 89, 0.15); font-size: 0.8rem; color: var(--accent-gold-dark); font-weight: 500;">
+              <div
+                style="text-align: center; background: rgba(197, 160, 89, 0.05); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid rgba(197, 160, 89, 0.15); font-size: 0.8rem; color: var(--accent-gold-dark); font-weight: 500;">
                 💡 請先在左側欄位<strong>載入測試案件</strong>，或直接使用<strong>快速搜尋</strong>開始進行 AI 協作！
               </div>
             </div>
@@ -257,7 +295,8 @@
 
             <div class="input-wrapper">
               <div class="prompt-input-container">
-                <textarea id="prompt-input" class="prompt-textarea" placeholder="在此輸入您的合規諮詢或追問問題... (按下 Enter 發送)" onkeydown="checkSubmit(event)" oninput="autoGrow(this)"></textarea>
+                <textarea id="prompt-input" class="prompt-textarea" placeholder="在此輸入您的合規諮詢或追問問題... (按下 Enter 發送)"
+                  onkeydown="checkSubmit(event)" oninput="autoGrow(this)"></textarea>
                 <button class="send-btn" onclick="handleSendText()" title="發送訊息">
                   <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -272,7 +311,7 @@
 
         <!-- Law References / Summary Sidebar -->
         <aside class="reference-panel">
-          
+
           <!-- Law Ref Section -->
           <div class="panel-section">
             <div class="panel-header" onclick="toggleSection('laws-content', this)">
@@ -314,7 +353,8 @@
   <!-- Toast popup -->
   <div class="toast" id="toast-notify">正在生成 PDF 報告，請稍候...</div>
 
-  <script src="../js/config.js"></script>
-  <script src="../js/workspace.js"></script>
+  <script src="../js/config.js?v=2"></script>
+  <script src="../js/workspace.js?v=3"></script>
 </body>
+
 </html>

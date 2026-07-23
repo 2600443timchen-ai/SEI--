@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>交通部中央氣象署 - 颱風百問 AI 智慧客服</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Marked.js 用於解析 Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.js"></script>
+    <!-- Mermaid.js 用於解析流程圖 -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <!-- FontAwesome 圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        mermaid.initialize({ startOnLoad: false, theme: 'default' });
+    </script>
+</head>
+
+<body class="bg-slate-100 h-screen flex flex-col">
+
+    <!-- 頂部導覽列 (氣象署風格) -->
+    <header class="bg-blue-900 text-white shadow-md py-4 px-6 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="bg-blue-700 p-2 rounded-lg">
+                <i class="fa-solid fa-cloud-bolt text-xl text-yellow-300"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-bold tracking-wider">交通部中央氣象署</h1>
+                <p class="text-xs text-blue-200">颱風百問 AI 智慧客服系統</p>
+            </div>
+        </div>
+        <div class="text-xs bg-blue-800 px-3 py-1 rounded-full text-blue-200">
+            <i class="fa-solid fa-circle text-green-400 text-[8px] mr-1"></i> 系統連線正常
+        </div>
+    </header>
+
+    <!-- 主聊天視窗區域 -->
+    <main id="chat-container" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 max-w-4xl w-full mx-auto">
+        <!-- 歡迎訊息 -->
+        <div class="flex items-start space-x-4">
+            <div
+                class="w-10 h-10 rounded-full bg-blue-800 text-white flex items-center justify-center flex-shrink-0 shadow">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 max-w-[80%] text-slate-750">
+                <p class="font-bold text-blue-900 mb-1">CWA 颱風小幫手</p>
+                <p class="text-sm">您好！我是交通部中央氣象署的颱風百問 AI 助理。您可以詢問我關於颱風形成、路徑預報、警報發布等相關問題！</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- 底部輸入區 -->
+    <footer class="bg-white border-t border-slate-200 p-4 shadow-lg">
+        <div class="max-w-4xl mx-auto flex items-center space-x-3">
+            <textarea id="user-input" rows="1" placeholder="請輸入您想詢問的颱風問題..."
+                class="flex-1 border border-slate-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent resize-none text-sm"></textarea>
+            <button id="send-btn" onclick="sendMessage()"
+                class="bg-blue-800 hover:bg-blue-900 text-white px-6 py-3 rounded-xl font-medium transition flex items-center justify-center shadow">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
+    </footer>
+
+    <!-- 前端 JavaScript 邏輯 (整合 API 與串流解析) -->
+    <script>
+        const API_BASE_URL = "https://cloud.geminidata.com/api/portal/api10/assistant/chat/6a618b58bf3a62d19bfb027b";
+        const PROJECT_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5ZTFiM2MxZTJkMzI3MDAyYjBiYTU4MyIsImlzQVBJIjp0cnVlLCJnX3VpZCI6IjY4YzI0MjA1YWMwYTg0MDAyYmE3YjYwYiIsImdfYWRtaW4iOnRydWUsImdfZGVtb2FkbWluIjpmYWxzZSwiZ19hY2NvdW50YWRtaW4iOmZhbHNlLCJnX3RpZCI6IjY4ZDUzZmE4YzFlMTMzMDAyYmRlZmYxZDpvd25lciIsImdfdGlkX3Blcm1pc3Npb24iOlsibWV0YTp1cGRhdGUiLCJtZXRhOmRlbGV0ZSIsInNvdXJjZTpyZWFkIiwic291cmNlOnVwZGF0ZSIsInNvdXJjZTpkZWxldGUiLCJncmFwaDpyZWFkIiwiZ3JhcGg6dXBkYXRlIiwiZ3JhcGg6ZGVsZXRlIiwiZ3JhcGg6ZXhwbG9yZSIsImdyYXBoOmV4cG9ydCIsImNhbnZhczphbm5vdGF0ZSIsImNhbnZhczpwZXJzb25hbGl6ZSIsImRhc2hib2FyZDpyZWFkIiwiZGFzaGJvYXJkOnVwZGF0ZSIsImNhbnZhczpzaGFwZSJdLCJnX3RpZF9wYXJzZXJfc291cmNlIjoiYW55LGFsdCIsImdfdGlkX2ZlYXR1cmVfYWRkX29ucyI6WyJhc3Npc3RhbnQiLCJvcGVuYXBpIl0sImdfYXZhdGFyIjoiMDIiLCJpc3MiOiJodHRwczovL2Nsb3VkLmdlbWluaWRhdGEuY29tIiwic3ViIjoiNjhjMjQyMDVhYzBhODQwMDJiYTdiNjBiIiwiYXVkIjoiaHR0cHM6Ly9jbG91ZC5nZW1pbmlkYXRhLmNvbSIsImV4cCI6NDg2NjcwNTI4MiwiaWF0IjoxNzc2Mzk5Mjk4LCJuaWNrbmFtZSI6Im1pcmFuZGEuY2hlbmdAZ2VtaW5pZGF0YS5jb20iLCJlbWFpbCI6Im1pcmFuZGEuY2hlbmdAZ2VtaW5pZGF0YS5jb20iLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsImxhbmciOiJ6aC1UVyJ9.8jR1Cr7HKLjPPFagNdBfjU0FyB-OJZAlt38NdYU7zIw'
+            ;
+        const PROJECT_ID = '6a439e670763de002d27d6bd:producer';
+
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+
+        async function getChatId(headers) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/assistant/chat/list`, { headers });
+                const data = await response.json();
+                if (data.data && data.data.length > 0) {
+                    return data.data[0]._id;
+                }
+                return null;
+            } catch (e) {
+                console.error("取得 Chat ID 失敗", e);
+                return null;
+            }
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // 1. 顯示使用者訊息
+            appendMessage(text, 'user');
+            userInput.value = '';
+
+            const headers = {
+                'Authorization': `Bearer ${PROJECT_TOKEN}`,
+                'x-application-tenant': PROJECT_ID,
+                'Content-Type': 'application/json'
+            };
+
+            // 2. 建立 AI 回覆的佔位容器
+            const aiMessageId = 'ai-msg-' + Date.now();
+            const aiContentDiv = appendMessage("正在查詢中央氣象署資料庫...", 'ai', aiMessageId);
+
+            try {
+                const chatID = await getChatId(headers);
+                if (!chatID) {
+                    aiContentDiv.innerHTML = "❌ 錯誤：無法取得有效的對話 ID。";
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE_URL}/assistant/chat/${chatID}`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({ q: text, streaming: true })
+                });
+
+                if (!response.ok) {
+                    aiContentDiv.innerHTML = `❌ 伺服器錯誤: ${response.status}`;
+                    return;
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullResult = "";
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value, { stream: true });
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith("data: ")) {
+                            const jsonStr = line.replace("data: ", "").strip?.() || line.replace("data: ", "").trim();
+                            if (jsonStr) {
+                                try {
+                                    const parsed = JSON.parse(jsonStr);
+                                    if (parsed.result) {
+                                        fullResult = parsed.result;
+                                        // 即時更新 Markdown 內容
+                                        aiContentDiv.innerHTML = marked.parse(fullResult);
+                                        // 重新渲染 Mermaid 圖表
+                                        mermaid.run({ nodes: aiContentDiv.querySelectorAll('.language-mermaid') });
+                                    }
+                                } catch (e) {
+                                    // 略過解析失敗的片段
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 串流結束後加上「複製按鈕」
+                addCopyButton(aiMessageId, fullResult);
+
+            } catch (error) {
+                aiContentDiv.innerHTML = `❌ 發生異常錯誤: ${error.message}`;
+            }
+        }
+
+        function appendMessage(text, sender, customId = '') {
+            const isUser = sender === 'user';
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex items-start space-x-4 ${isUser ? 'flex-row-reverse space-x-reverse' : ''}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = `w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 shadow ${isUser ? 'bg-slate-700 text-white' : 'bg-blue-800 text-white'}`;
+            avatar.innerHTML = isUser ? '<i class="fa-solid fa-user"></i>' : '<i class="fa-solid fa-robot"></i>';
+
+            const bubbleContainer = document.createElement('div');
+            bubbleContainer.className = `flex flex-col max-w-[80%] ${isUser ? 'items-end' : 'items-start'}`;
+
+            const senderName = document.createElement('p');
+            senderName.className = `font-bold text-xs mb-1 ${isUser ? 'text-slate-600' : 'text-blue-900'}`;
+            senderName.innerText = isUser ? '民眾' : 'CWA 颱風小幫手';
+
+            const bubble = document.createElement('div');
+            bubble.className = `p-4 rounded-2xl shadow-sm border text-sm ${isUser ? 'bg-blue-800 text-white border-blue-950' : 'bg-white text-slate-800 border-slate-200 w-full'}`;
+            if (customId) bubble.id = customId;
+
+            if (isUser) {
+                bubble.innerText = text;
+            } else {
+                bubble.innerHTML = marked.parse(text);
+            }
+
+            bubbleContainer.appendChild(senderName);
+            bubbleContainer.appendChild(bubble);
+            wrapper.appendChild(avatar);
+            wrapper.appendChild(bubbleContainer);
+            chatContainer.appendChild(wrapper);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            return bubble;
+        }
+
+        function addCopyButton(elementId, textToCopy) {
+            const bubble = document.getElementById(elementId);
+            if (!bubble) return;
+
+            const copyBar = document.createElement('div');
+            copyBar.className = 'mt-3 pt-2 border-t border-slate-100 flex justify-end';
+
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg flex items-center space-x-1.5 transition';
+            copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i><span>複製內容</span>';
+
+            copyBtn.onclick = () => {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    copyBtn.innerHTML = '<i class="fa-solid fa-check text-green-600"></i><span class="text-green-600">已複製！</span>';
+                    setTimeout(() => {
+                        copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i><span>複製內容</span>';
+                    }, 2000);
+                });
+            };
+
+            copyBar.appendChild(copyBtn);
+            bubble.appendChild(copyBar);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    </script>
+</body>
+
+</html>

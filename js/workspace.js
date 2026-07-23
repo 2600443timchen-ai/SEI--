@@ -1,10 +1,11 @@
 /* Workspace Page Interactivity and API integration
    純前端模式：直接 POST 到 Portal Chat API（CORS 已開放）
-   端點：GEMINI_CHAT_URL（定義於 config.js）
+   動態獲取 chat ID，避免 301 Chat not found 錯誤
 */
 
 let vectorKnowledgeFiles = [];
 let activeCaseId = null;
+let activeChatId = null;
 
 // Mock databases
 const caseDb = {
@@ -78,6 +79,25 @@ function initApi() {
   renderLawsSidebar(null);
 }
 
+// 取得 Chat ID (參考 sample.html)
+async function getChatId() {
+  if (activeChatId) return activeChatId; // 如果已經有了就直接用
+  try {
+    const response = await fetch(`${GEMINI_API_BASE}/assistant/chat/list`, {
+      headers: getApiHeaders()
+    });
+    const data = await response.json();
+    if (data.data && data.data.length > 0) {
+      activeChatId = data.data[0]._id; // 拿最新的一個會話
+      return activeChatId;
+    }
+    return null;
+  } catch (e) {
+    console.error("取得 Chat ID 失敗", e);
+    return null;
+  }
+}
+
 // Automatically grow prompt input textarea based on user input height
 function autoGrow(el) {
   el.style.height = '42px';
@@ -89,7 +109,7 @@ function autoGrow(el) {
 function initUploadZone() {
   const dropzone = document.getElementById('upload-zone');
   if (!dropzone) return;
-  
+
   ['dragenter', 'dragover'].forEach(eventName => {
     dropzone.addEventListener(eventName, (e) => {
       e.preventDefault();
@@ -130,8 +150,8 @@ async function handleFile(file) {
   let applicantName = '陳○○';
   let disputeItem = '理賠範圍爭議與說明義務瑕疵';
   let disputeType = '金融消費爭議 (一般商品)';
-  
-  const cleanName = file.name.replace(/\.[^/.]+$/, ""); 
+
+  const cleanName = file.name.replace(/\.[^/.]+$/, "");
   const parts = cleanName.split('_');
   if (parts.length >= 2) {
     applicantName = parts[0];
@@ -143,7 +163,7 @@ async function handleFile(file) {
   } else if (cleanName.includes('王')) {
     applicantName = '王○○';
   }
-  
+
   if (cleanName.includes('住院') || cleanName.includes('保險') || cleanName.includes('醫療')) {
     disputeType = '保險給付爭議 (醫療保險)';
   } else if (cleanName.includes('理專') || cleanName.includes('投資') || cleanName.includes('基金')) {
@@ -190,7 +210,7 @@ async function createCustomCaseFromForm() {
   const amount = document.getElementById('form-amount').value.trim() || 'NT$ 0';
 
   const caseId = 'C-NEW-' + Math.floor(Math.random() * 90000 + 10000);
-  
+
   caseDb[caseId] = {
     id: caseId,
     applicant: applicant,
@@ -224,14 +244,14 @@ function resetWorkspace() {
   activeCaseId = null;
   activeChatId = null;
   document.getElementById('case-search').value = '';
-  
+
   document.getElementById('sidebar-empty').style.display = 'flex';
   document.getElementById('sidebar-card').style.display = 'none';
-  
+
   document.getElementById('chat-empty').style.display = 'flex';
   document.getElementById('chat-container').style.display = 'none';
   document.getElementById('chat-container').innerHTML = '';
-  
+
   document.getElementById('form-applicant').value = '';
   document.getElementById('form-item').value = '';
   document.getElementById('form-amount').value = '';
@@ -318,18 +338,11 @@ function loadCaseIntoChat(matchedCase) {
 
 function formatMessageText(text) {
   if (!text) return '';
-  text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  text = text.replace(/^### (.*?)$/gm, '<h4 style="margin: 0.5rem 0 0.2rem 0; color: var(--accent-gold-dark);">$1</h4>');
-  text = text.replace(/^## (.*?)$/gm, '<h3 style="margin: 0.75rem 0 0.3rem 0; color: var(--accent-blue);">$1</h3>');
-  text = text.split('\n').map(line => {
-    if (line.startsWith('1. ') || line.startsWith('2. ') || line.startsWith('3. ') || line.startsWith('4. ')) {
-      return `<div style="margin-left: 0.8rem; margin-top: 0.2rem;">${line}</div>`;
-    }
-    if (line.trim().startsWith('* ')) {
-      return `<div style="margin-left: 0.8rem; margin-top: 0.2rem; display: flex; gap: 0.35rem;"><span style="color: var(--accent-gold);">•</span><span>${line.trim().substring(2)}</span></div>`;
-    }
-    return line;
-  }).join('\n');
+  // 如果載入了 marked.js，則使用它來渲染 Markdown（包含表格、粗體、清單等）
+  if (typeof marked !== 'undefined') {
+    return marked.parse(text);
+  }
+  // Fallback (萬一沒載入成功)
   return text.replace(/\n/g, '<br>');
 }
 
@@ -413,7 +426,7 @@ function appendUserMessage(text) {
   const row = document.createElement('div');
   row.className = 'message-row user';
   row.innerHTML = `
-    <div class="message-avatar">用</div>
+    <div class="">林</div>
     <div class="message-bubble">${formatMessageText(text)}</div>
   `;
   stream.appendChild(row);
@@ -443,10 +456,10 @@ function simulateAiResponse(responseText) {
       const speed = 15;
       function typeWriter() {
         if (index < responseText.length) {
-          const sliceSize = responseText.substr(index, 3);
-          bubble.innerHTML += sliceSize;
           index += 3;
-          bubble.innerHTML = formatMessageText(bubble.innerText);
+          if (index > responseText.length) index = responseText.length;
+          const currentMarkdown = responseText.substring(0, index);
+          bubble.innerHTML = formatMessageText(currentMarkdown);
           scrollChatToBottom();
           setTimeout(typeWriter, speed);
         }
@@ -484,7 +497,7 @@ async function handleSendText() {
     // Bootstrap a text-based custom case dynamically
     const bootText = text;
     const caseId = 'C-TXT-' + Math.floor(Math.random() * 90000 + 10000);
-    
+
     let disputeType = '金融消費爭議 (一般商品)';
     if (bootText.includes('住院') || bootText.includes('醫療') || bootText.includes('保險')) {
       disputeType = '保險給付爭議 (醫療險)';
@@ -540,20 +553,18 @@ async function handleSendText() {
 }
 
 // ============================================================
-// 核心 AI 呼叫：直接 POST 到 GEMINI_CHAT_URL
-// 端點已內建 chatId，無需 /chat/list，無 CORS 問題
-// SSE 解析：result 欄位為累積覆蓋（直接 assign，非 +=）
+// 核心 AI 呼叫：動態獲取 Chat ID 並 POST 到 Portal Chat 端點
+// 支援 SSE 解析與一般 JSON 錯誤處理
 // ============================================================
 async function sendQuestionToApi(questionText) {
   const stream = document.getElementById('chat-container');
 
-  // 加入打字中 loader
-  const loaderRow = document.createElement('div');
-  loaderRow.className = 'message-row assistant';
-  loaderRow.id = 'loader-row';
-  loaderRow.innerHTML = `
+  // 建立唯一的回覆泡泡，初始狀態為打字中動畫 (Loader)
+  const aiRow = document.createElement('div');
+  aiRow.className = 'message-row assistant';
+  aiRow.innerHTML = `
     <div class="message-avatar">AI</div>
-    <div class="message-bubble" id="typing-bubble">
+    <div class="message-bubble" id="streaming-bubble">
       <div class="typing-loader">
         <span class="typing-dot"></span>
         <span class="typing-dot"></span>
@@ -561,25 +572,26 @@ async function sendQuestionToApi(questionText) {
       </div>
     </div>
   `;
-  stream.appendChild(loaderRow);
+  stream.appendChild(aiRow);
   scrollChatToBottom();
+
+  const bubble = aiRow.querySelector('.message-bubble');
 
   // 建立案件背景 context
   const caseCtx = activeCaseId && caseDb[activeCaseId]
     ? `[金融消費爭議案件背景]\n案號: ${caseDb[activeCaseId].id}\n案件類型: ${caseDb[activeCaseId].type}\n爭議要點: ${caseDb[activeCaseId].item}\n爭議金額: ${caseDb[activeCaseId].amount}\n\n`
     : '';
 
-  // SSE 回覆泡泡（展假串流就緒備就緒）
-  const newRow = document.createElement('div');
-  newRow.className = 'message-row assistant';
-  newRow.innerHTML = `
-    <div class="message-avatar">AI</div>
-    <div class="message-bubble" id="streaming-bubble"><span style="opacity:0.4;">正在生成回覆...</span></div>
-  `;
+  // 1. 動態取得 Chat ID
+  const chatID = await getChatId();
+  if (!chatID) {
+    bubble.innerHTML = '❌ 錯誤：無法取得有效的對話 ID，請檢查 Token 與權限。';
+    return;
+  }
 
   try {
-    // 直接 POST 到 Portal Chat 端點（chatId 已內建於 URL）
-    const response = await fetch(GEMINI_CHAT_URL, {
+    // 2. 直接 POST 到 Portal Chat 端點
+    const response = await fetch(`${GEMINI_API_BASE}/assistant/chat/${chatID}`, {
       method: 'POST',
       headers: getApiHeaders(),
       body: JSON.stringify({
@@ -588,46 +600,76 @@ async function sendQuestionToApi(questionText) {
       })
     });
 
-    // 移除 loader，加入回覆泡泡
-    document.getElementById('loader-row')?.remove();
-    stream.appendChild(newRow);
-    scrollChatToBottom();
-    const bubble = document.getElementById('streaming-bubble');
-    bubble.removeAttribute('id');
-    bubble.innerHTML = '';
+    // 若 API 回傳 4xx/5xx
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`伺服器錯誤: ${response.status} - ${errText}`);
+    }
 
-    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+    // 若 API 不是回傳 Stream，而是回傳一般的 JSON (如 Chat not found 錯誤)
+    const contentType = response.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      const resJson = await response.json();
+      if (resJson.status === 'error' || resJson.error_code) {
+        bubble.innerHTML = `❌ API 錯誤: ${resJson.msg || resJson.code || '未知錯誤'}`;
+        return;
+      }
+    }
 
     // === SSE 串流解析 ===
-    // result 欄位為累積覆蓋（类似 sample_code.py 的 final_result）
-    // 每個 chunk 直接 assign latestResult，不 +=
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');
-    let buffer = '';       // 跨 chunk 緩衝區
-    let latestResult = ''; // 最終完整答案
+    let buffer = '';
+    let latestResult = '';
     let done = false;
+    let isFirstChunk = true;
+
+    // UI 平滑渲染控制 (打字機特效)
+    let displayIndex = 0;
+    let typingInterval = null;
 
     while (!done) {
       const { value, done: readerDone } = await reader.read();
       done = readerDone;
+
+      if (isFirstChunk && (value || done)) {
+        // 收到第一筆真實串流封包，開始將內容覆寫掉 loader
+        bubble.removeAttribute('id');
+        isFirstChunk = false;
+
+        // 啟動獨立的 UI 打字機渲染循環
+        typingInterval = setInterval(() => {
+          if (displayIndex < latestResult.length) {
+            displayIndex += 3; // 每次前進 3 個字元
+            if (displayIndex > latestResult.length) displayIndex = latestResult.length;
+            const currentMarkdown = latestResult.substring(0, displayIndex);
+            bubble.innerHTML = formatMessageText(currentMarkdown);
+            scrollChatToBottom();
+          } else if (done && displayIndex >= latestResult.length) {
+            // 串流結束，且畫面已追上最終長度，清除計時器
+            clearInterval(typingInterval);
+            bubble.innerHTML = formatMessageText(latestResult);
+            scrollChatToBottom();
+          }
+        }, 15);
+      }
+
       if (value) {
         buffer += decoder.decode(value, { stream: !done });
         const lines = buffer.split('\n');
-        buffer = lines.pop() ?? ''; // 保留可能不完整的最後行
+        buffer = lines.pop() ?? '';
 
         for (const rawLine of lines) {
           const line = rawLine.trim();
           if (!line.startsWith('data:')) continue;
 
-          const jsonStr = line.slice(5).trim(); // 去掉 "data: " 前綴
+          const jsonStr = line.slice(5).trim();
           if (!jsonStr || jsonStr === '[DONE]') continue;
 
           try {
             const parsed = JSON.parse(jsonStr);
             if ('result' in parsed && parsed.result) {
-              latestResult = parsed.result; // 直接覆蓋，非累積
-              bubble.innerHTML = formatMessageText(latestResult);
-              scrollChatToBottom();
+              latestResult = parsed.result; // 背景更新最新拿到的完整文字
             }
           } catch {
             // 忽略解析失敗的零碎片段
@@ -636,13 +678,15 @@ async function sendQuestionToApi(questionText) {
       }
     }
 
-    // 串流結束
-    if (latestResult) {
-      bubble.innerHTML = formatMessageText(latestResult);
-    } else {
-      bubble.innerHTML = '<span style="opacity:0.5;">（AI 未回傳有效回覆）</span>';
+    // 防呆：如果 API 異常或結束時完全沒有啟動定時器
+    if (!typingInterval) {
+      if (latestResult) {
+        bubble.innerHTML = formatMessageText(latestResult);
+      } else {
+        bubble.innerHTML = '<span style="opacity:0.5;">（AI 未回傳有效回覆或拒絕回答此問題）</span>';
+      }
+      scrollChatToBottom();
     }
-    scrollChatToBottom();
 
   } catch (err) {
     console.error('[GeminiData API] 呼叫失敗:', err);
@@ -677,7 +721,7 @@ function triggerExport() {
 
   setTimeout(() => {
     toast.style.display = 'none';
-    
+
     // Export file simulated
     const matchedCase = caseDb[activeCaseId];
     const exportData = {
@@ -690,7 +734,7 @@ function triggerExport() {
       generatedAt: new Date().toLocaleString()
     };
 
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], {type: 'application/json'});
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
