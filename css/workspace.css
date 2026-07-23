@@ -67,6 +67,12 @@ header {
   -webkit-text-fill-color: transparent;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
 .user-profile {
   display: flex;
   align-items: center;
@@ -494,8 +500,9 @@ header {
 
 /* Right Side: AI Workspace */
 .ai-workspace {
-  display: grid;
-  grid-template-rows: 1fr auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   overflow: hidden;
   background: transparent;
   position: relative;
@@ -505,6 +512,7 @@ header {
 .workspace-grid {
   display: grid;
   grid-template-columns: 1fr 340px;
+  height: 100%;
   overflow: hidden;
 }
 
@@ -512,11 +520,20 @@ header {
 .chat-section {
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  padding: var(--gap);
-  gap: var(--gap);
+  height: 100%;
+  overflow: hidden;
   border-right: 1px solid var(--border-color);
   background: rgba(255, 255, 255, 0.2);
+  position: relative;
+}
+
+.chat-messages-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--gap);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
 }
 
 .chat-welcome-state {
@@ -814,16 +831,20 @@ header {
 }
 
 /* Bottom Control Bar: Prompt Input & Export */
+.chat-section .control-section,
 .control-section {
-  border-top: 1px solid var(--border-color);
-  padding: var(--gap);
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  border-top: none !important;
+  padding: 0.5rem var(--gap) 1.25rem var(--gap) !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
   z-index: 10;
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 /* Quick Prompt suggestions */
@@ -831,115 +852,145 @@ header {
   display: flex;
   gap: 0.5rem;
   overflow-x: auto;
-  padding-bottom: 2px;
+  padding-bottom: 4px;
+  max-width: 800px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 .prompt-chip {
-  background: #FFFFFF;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  padding: 0.35rem 0.8rem;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 0.4rem 0.9rem;
   border-radius: var(--radius-pill);
   font-size: 0.78rem;
-  color: var(--text-muted);
+  color: var(--text-main);
   white-space: nowrap;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  transition: all 0.2s;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.01);
+  gap: 0.4rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
 }
 
 .prompt-chip:hover {
-  background: rgba(0, 0, 0, 0.01);
-  border-color: rgba(30, 58, 138, 0.25);
-  color: var(--accent-blue);
+  background: #FFFFFF;
+  border-color: var(--accent-gold);
+  color: var(--accent-gold-dark);
+  box-shadow: 0 4px 12px rgba(197, 160, 89, 0.15);
+  transform: translateY(-1px);
 }
 
 .input-wrapper {
   display: flex;
-  gap: 0.75rem;
-  align-items: flex-end;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .prompt-input-container {
   flex: 1;
   position: relative;
   background: #FFFFFF;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: var(--radius-md);
-  transition: all 0.3s;
+  border: 1.5px solid rgba(0, 0, 0, 0.08);
+  border-radius: 24px;
+  padding: 0.35rem 0.6rem 0.35rem 1.25rem;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .prompt-input-container:focus-within {
-  border-color: var(--accent-blue);
-  box-shadow: 0 0 10px rgba(30, 58, 138, 0.1);
+  border-color: var(--accent-gold);
+  box-shadow: 0 8px 30px rgba(197, 160, 89, 0.18), 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .prompt-textarea {
-  width: 100%;
+  flex: 1;
   border: none;
   background: transparent;
-  padding: 0.75rem 1rem;
+  padding: 0.6rem 0.5rem 0.6rem 0;
   color: var(--text-main);
   font-size: 0.92rem;
   font-family: inherit;
   resize: none;
   outline: none;
-  height: 48px;
+  height: 42px;
   max-height: 180px;
   overflow-y: auto;
   line-height: 1.5;
   transition: height 0.1s ease;
 }
 
+.prompt-textarea::placeholder {
+  color: #94a3b8;
+  font-size: 0.88rem;
+}
+
 .send-btn {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  width: 32px;
-  height: 32px;
-  background: var(--accent-blue);
+  position: relative;
+  right: 0;
+  bottom: 0;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dark));
   border: none;
-  border-radius: var(--radius-sm);
+  border-radius: 50%;
   color: #FFF;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(197, 160, 89, 0.3);
+  margin-left: 0.5rem;
 }
 
 .send-btn:hover {
-  background: var(--accent-blue-hover);
-  box-shadow: 0 2px 6px rgba(30, 58, 138, 0.2);
+  transform: scale(1.06);
+  background: linear-gradient(135deg, #d4af66, #9e7d3b);
+  box-shadow: 0 4px 14px rgba(197, 160, 89, 0.45);
 }
 
 .send-btn svg {
   width: 16px;
   height: 16px;
+  margin-left: 1px;
 }
 
 .export-btn {
-  height: 48px;
-  padding: 0 1.25rem;
-  background: #FFFFFF;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: var(--radius-md);
+  height: 34px;
+  padding: 0 0.9rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   color: var(--text-main);
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s;
+  gap: 0.4rem;
+  transition: all 0.25s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
   white-space: nowrap;
 }
 
 .export-btn:hover {
-  background: rgba(0, 0, 0, 0.02);
-  border-color: var(--text-muted);
+  background: #FFFFFF;
+  border-color: var(--accent-gold);
+  color: var(--accent-gold-dark);
+  box-shadow: 0 4px 12px rgba(197, 160, 89, 0.15);
+  transform: translateY(-1px);
+}
+
+.export-btn svg {
+  color: var(--accent-gold-dark);
 }
 
 /* Modal / Toast Notification */

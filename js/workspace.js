@@ -1,12 +1,9 @@
-/* Workspace Page Interactivity and API integration */
+/* Workspace Page Interactivity and API integration
+   純前端模式：直接 POST 到 Portal Chat API（CORS 已開放）
+   端點：GEMINI_CHAT_URL（定義於 config.js）
+*/
 
-const getHeaders = () => ({
-  'Content-Type': 'application/json'
-});
-
-let chatList = [];
 let vectorKnowledgeFiles = [];
-let activeChatId = null;
 let activeCaseId = null;
 
 // Mock databases
@@ -75,16 +72,15 @@ const caseDb = {
   }
 };
 
-// Initialize API functions on load
-async function initApi() {
-  await fetchChatSessions();
-  await fetchKnowledgeBase();
+// Initialize UI on load
+function initApi() {
   initUploadZone();
+  renderLawsSidebar(null);
 }
 
 // Automatically grow prompt input textarea based on user input height
 function autoGrow(el) {
-  el.style.height = '48px';
+  el.style.height = '42px';
   const newHeight = Math.min(el.scrollHeight, 180);
   el.style.height = newHeight + 'px';
 }
@@ -125,43 +121,9 @@ async function handleFileSelect(e) {
   }
 }
 
-// Handle case file upload and details parsing
+// Handle case file upload and details parsing (純前端本地解析版)
 async function handleFile(file) {
-  appendSystemMessage(`系統偵測到案件檔案上傳：<b>${file.name}</b>。正在將檔案寫入向量知識庫...`);
-  
-  let uploadSucceeded = false;
-  let remoteFilePath = '';
-  
-  try {
-    const formData = new FormData();
-    formData.append('file', file);
-    
-    const uploadRes = await fetch(`${API_BASE}/import/uploads`, {
-      method: 'POST',
-      body: formData
-    });
-    
-    if (uploadRes.ok) {
-      const resData = await uploadRes.json();
-      remoteFilePath = resData.path || resData.file_path || '';
-      uploadSucceeded = true;
-      appendSystemMessage(`雲端上傳成功，正啟動 RAG 向量知識庫切片流程...`);
-      
-      await fetch(`${API_BASE}/import/vector/knowledge`, {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify({
-          title: file.name,
-          file_name: file.name,
-          file_path: remoteFilePath
-        })
-      });
-      
-      await fetchKnowledgeBase();
-    }
-  } catch (err) {
-    console.warn('API upload error, using local fallback parser:', err);
-  }
+  appendSystemMessage(`系統偵測到案件檔案：<b>${file.name}</b>。正在本地解析案件資料...`);
 
   // Fallback local case generation based on file name details
   const caseId = 'C-UPL-' + Math.floor(Math.random() * 90000 + 10000);
@@ -276,37 +238,7 @@ function resetWorkspace() {
   renderLawsSidebar(null);
 }
 
-// Fetch chat sessions list
-async function fetchChatSessions() {
-  try {
-    const res = await fetch(`${API_BASE}/chat/list`, {
-      headers: getHeaders()
-    });
-    if (res.ok) {
-      chatList = await res.json();
-    }
-  } catch (err) {
-    console.error('Error fetching chat sessions:', err);
-  }
-}
-
-// Fetch Knowledge Base files and render in panel
-async function fetchKnowledgeBase() {
-  try {
-    const res = await fetch(`${API_BASE}/import/vector/knowledge`, {
-      headers: getHeaders()
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && data.knowledge) {
-        vectorKnowledgeFiles = data.knowledge;
-        renderLawsSidebar(caseDb[activeCaseId]);
-      }
-    }
-  } catch (err) {
-    console.error('Error loading knowledge files:', err);
-  }
-}
+// (純前端模式：無需 fetchChatSessions / fetchKnowledgeBase，改用本地案卷資料)
 
 function renderLawsSidebar(matchedCase) {
   const container = document.getElementById('sidebar-laws-list');
@@ -376,86 +308,12 @@ function renderLawsSidebar(matchedCase) {
   }
 }
 
-// Load messages history for a chat
-async function loadChatMessages(chatId) {
-  try {
-    const res = await fetch(`${API_BASE}/chat/${chatId}/messages`, {
-      headers: getHeaders()
-    });
-    if (!res.ok) throw new Error('Load messages failed');
-    
-    const messages = await res.json();
-    const chatContainer = document.getElementById('chat-container');
-    chatContainer.innerHTML = '';
-    
-    appendSystemMessage(`已同步雲端 API 會話紀錄。`);
-
-    if (messages && messages.length > 0) {
-      messages.forEach(msg => {
-        const role = msg.role || msg.speaker;
-        const text = msg.text || msg.content || '';
-        if (role === 'user') {
-          appendUserMessage(text);
-        } else if (text) {
-          const stream = document.getElementById('chat-container');
-          const row = document.createElement('div');
-          row.className = 'message-row assistant';
-          row.innerHTML = `
-            <div class="message-avatar">AI</div>
-            <div class="message-bubble">${formatMessageText(text)}</div>
-          `;
-          stream.appendChild(row);
-          scrollChatToBottom();
-        }
-      });
-    } else {
-      const matchedCase = caseDb[activeCaseId];
-      if (matchedCase) {
-        simulateAiResponse(matchedCase.initialResponse);
-      }
-    }
-  } catch (err) {
-    console.error('Error loading historical messages:', err);
-    const matchedCase = caseDb[activeCaseId];
-    if (matchedCase) {
-      simulateAiResponse(matchedCase.initialResponse);
-    }
-  }
-}
-
-// Create a new chat session
-async function createChatSession(caseId, initialPrompt) {
-  try {
-    const createRes = await fetch(`${API_BASE}/chat/create`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({})
-    });
-    if (!createRes.ok) throw new Error('Create session failed');
-    const createData = await createRes.json();
-    const chatId = createData.insertedId;
-    activeChatId = chatId;
-
-    await fetch(`${API_BASE}/chat/${chatId}/update`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ title: caseId })
-    });
-
-    await fetchChatSessions();
-    appendSystemMessage(`已建立雲端 RAG 協作專案。`);
-    
-    setTimeout(() => {
-      simulateAiResponse(initialPrompt);
-    }, 600);
-  } catch (err) {
-    console.error('Error creating live chat:', err);
-    activeChatId = 'mock_chat_' + caseId;
-    appendSystemMessage(`連線 API 異常，已啟動本地模擬工作區。`);
-    setTimeout(() => {
-      simulateAiResponse(initialPrompt);
-    }, 600);
-  }
+// 純前端：直接啟動 AI 歡迎分析（不需要後端 Session 管理）
+function loadCaseIntoChat(matchedCase) {
+  appendSystemMessage(`已載入案件 <b>${matchedCase.id}</b>，合規精靈 AI 工作區準備就緒。`);
+  setTimeout(() => {
+    simulateAiResponse(matchedCase.initialResponse);
+  }, 400);
 }
 
 function formatMessageText(text) {
@@ -517,16 +375,10 @@ async function triggerSearch() {
     document.getElementById('chat-empty').style.display = 'none';
     const chatContainer = document.getElementById('chat-container');
     chatContainer.style.display = 'flex';
-    chatContainer.innerHTML = ''; 
-    appendSystemMessage(`已載入案件 ${matchedCase.id}。AI 分析工作區準備就緒。`);
+    chatContainer.innerHTML = '';
 
-    let existingChat = chatList.find(c => c.title === matchedCase.id);
-    if (existingChat) {
-      activeChatId = existingChat._id;
-      await loadChatMessages(activeChatId);
-    } else {
-      await createChatSession(matchedCase.id, matchedCase.initialResponse);
-    }
+    // 純前端：直接顯示 AI 分析歡迎訊息
+    loadCaseIntoChat(matchedCase);
   } else {
     alert('無此測試案件，請輸入 C-20231015-001 或 C-20231102-005 進行試用。');
   }
@@ -617,17 +469,8 @@ function useQuickPrompt(promptText) {
 
 async function askAiToAnalyzeCase() {
   if (!activeCaseId) return;
-  appendUserMessage('啟動對此案的深入適法性評估分析。');
-  
   const promptText = '請針對本案細節，啟動深入的適法性評估與合規風險分析。';
-  
-  if (!activeChatId || activeChatId.startsWith('mock_chat_')) {
-    setTimeout(() => {
-      simulateAiResponse('正在調取關聯案件司法判決書與金評會裁決書...\n\n經查，本件爭議涉及銷售投資型商品。金評會類似裁決（如 110 年評字第 124 號）指出，業者若無法舉證其於業務員推介時已詳實揭露主要投資風險及匯率折算要點，即應認定未盡金保法第 10 條之說明義務。\n\n本案評估意見：**業者合規瑕疵明確度高，建議先行向消費者協議 30%~50% 金額之補償和解。**');
-    }, 600);
-    return;
-  }
-
+  appendUserMessage('啟動對此案的深入適法性評估分析。');
   await sendQuestionToApi(promptText);
 }
 
@@ -677,44 +520,37 @@ async function handleSendText() {
     // Clear search field, prompt field and load case
     document.getElementById('case-search').value = caseId;
     promptInput.value = '';
-    promptInput.style.height = '48px';
-    
-    await triggerSearch(); // this triggers chat creation and loads it
-    
-    // Wait briefly for triggerSearch to create session then send question
+    promptInput.style.height = '42px';
+
+    await triggerSearch();
+
     setTimeout(async () => {
       appendUserMessage(bootText);
       await sendQuestionToApi(bootText);
-    }, 1200);
-    
+    }, 800);
+
     return;
   }
 
   appendUserMessage(text);
   promptInput.value = '';
-  promptInput.style.height = '48px';
-
-  if (!activeChatId || activeChatId.startsWith('mock_chat_')) {
-    let mockReply = '已收到您的問題。正在檢索本案卷宗與法學知識庫...\n\n針對您的提問「' + text + '」，合規精靈建議：\n\n1. 應重新調閱專員與客戶的通聯記錄或臨櫃錄影。\n2. 對照同類型商品爭議之金評會判定，我方應在答辯書中強調客戶已簽署之風險預告書條款，但需防範法官引用《金保法》適合度漏洞。';
-    if (text.includes('報告') || text.includes('報告草稿')) {
-      mockReply = '## 金融消費爭議案件合規審查意見書 (草稿)\n\n*   **案號**：' + activeCaseId + '\n*   **審查重點**：' + caseDb[activeCaseId].item + '\n\n### ⚖️ 合規性判定\n根據現有事證，本案評估有顯著合規疏失風險，主要集中於適合度規範之落實與風險揭露聲明是否被口頭承諾所架空。\n\n### 💡 行動方案指引\n1. **協議和解**：爭取於評議程序前取得和解。\n2. **合規宣導**：加強前線理專之風險告知抽查比率。';
-    }
-    setTimeout(() => {
-      simulateAiResponse(mockReply);
-    }, 700);
-    return;
-  }
+  promptInput.style.height = '42px';
 
   await sendQuestionToApi(text);
 }
 
-// API Post implementation helper
+// ============================================================
+// 核心 AI 呼叫：直接 POST 到 GEMINI_CHAT_URL
+// 端點已內建 chatId，無需 /chat/list，無 CORS 問題
+// SSE 解析：result 欄位為累積覆蓋（直接 assign，非 +=）
+// ============================================================
 async function sendQuestionToApi(questionText) {
   const stream = document.getElementById('chat-container');
-  
-  // Add temporary typing loader row
+
+  // 加入打字中 loader
   const loaderRow = document.createElement('div');
   loaderRow.className = 'message-row assistant';
+  loaderRow.id = 'loader-row';
   loaderRow.innerHTML = `
     <div class="message-avatar">AI</div>
     <div class="message-bubble" id="typing-bubble">
@@ -728,90 +564,98 @@ async function sendQuestionToApi(questionText) {
   stream.appendChild(loaderRow);
   scrollChatToBottom();
 
+  // 建立案件背景 context
+  const caseCtx = activeCaseId && caseDb[activeCaseId]
+    ? `[金融消費爭議案件背景]\n案號: ${caseDb[activeCaseId].id}\n案件類型: ${caseDb[activeCaseId].type}\n爭議要點: ${caseDb[activeCaseId].item}\n爭議金額: ${caseDb[activeCaseId].amount}\n\n`
+    : '';
+
+  // SSE 回覆泡泡（展假串流就緒備就緒）
+  const newRow = document.createElement('div');
+  newRow.className = 'message-row assistant';
+  newRow.innerHTML = `
+    <div class="message-avatar">AI</div>
+    <div class="message-bubble" id="streaming-bubble"><span style="opacity:0.4;">正在生成回覆...</span></div>
+  `;
+
   try {
-    const response = await fetch(`${API_BASE}/chat/${activeChatId}`, {
+    // 直接 POST 到 Portal Chat 端點（chatId 已內建於 URL）
+    const response = await fetch(GEMINI_CHAT_URL, {
       method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ q: questionText, streaming: true })
+      headers: getApiHeaders(),
+      body: JSON.stringify({
+        q: caseCtx ? `${caseCtx}${questionText}` : questionText,
+        streaming: true
+      })
     });
 
-    // Remove loader bubble
-    const loader = document.getElementById('typing-bubble');
-    if (loader) {
-      loader.parentElement.remove();
-    }
+    // 移除 loader，加入回覆泡泡
+    document.getElementById('loader-row')?.remove();
+    stream.appendChild(newRow);
+    scrollChatToBottom();
+    const bubble = document.getElementById('streaming-bubble');
+    bubble.removeAttribute('id');
+    bubble.innerHTML = '';
 
-    if (!response.ok) throw new Error('API Error: ' + response.status);
+    if (!response.ok) throw new Error(`API Error: ${response.status}`);
 
-    const contentType = response.headers.get('content-type') || '';
-    if (contentType.includes('text/event-stream')) {
-      // SSE Stream reader
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf-8');
-      let done = false;
+    // === SSE 串流解析 ===
+    // result 欄位為累積覆蓋（类似 sample_code.py 的 final_result）
+    // 每個 chunk 直接 assign latestResult，不 +=
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let buffer = '';       // 跨 chunk 緩衝區
+    let latestResult = ''; // 最終完整答案
+    let done = false;
 
-      const newRow = document.createElement('div');
-      newRow.className = 'message-row assistant';
-      newRow.innerHTML = `
-        <div class="message-avatar">AI</div>
-        <div class="message-bubble" id="streaming-bubble"></div>
-      `;
-      stream.appendChild(newRow);
-      scrollChatToBottom();
-      const bubble = document.getElementById('streaming-bubble');
-      bubble.removeAttribute('id');
+    while (!done) {
+      const { value, done: readerDone } = await reader.read();
+      done = readerDone;
+      if (value) {
+        buffer += decoder.decode(value, { stream: !done });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() ?? ''; // 保留可能不完整的最後行
 
-      let fullText = '';
-      while (!done) {
-        const { value, done: readerDone } = await reader.read();
-        done = readerDone;
-        if (value) {
-          const chunk = decoder.decode(value, { stream: !done });
-          const lines = chunk.split('\n');
-          for (let line of lines) {
-            line = line.trim();
-            if (line.startsWith('data:')) {
-              const dataStr = line.slice(5).trim();
-              if (dataStr === '[DONE]') continue;
-              try {
-                const parsed = JSON.parse(dataStr);
-                const word = parsed.result || parsed.choices?.[0]?.delta?.content || parsed.text || parsed.answer || parsed.content || '';
-                fullText += word;
-                bubble.innerHTML = formatMessageText(fullText);
-                scrollChatToBottom();
-              } catch (e) {
-                if (dataStr) {
-                  fullText += dataStr;
-                  bubble.innerHTML = formatMessageText(fullText);
-                  scrollChatToBottom();
-                }
-              }
+        for (const rawLine of lines) {
+          const line = rawLine.trim();
+          if (!line.startsWith('data:')) continue;
+
+          const jsonStr = line.slice(5).trim(); // 去掉 "data: " 前綴
+          if (!jsonStr || jsonStr === '[DONE]') continue;
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            if ('result' in parsed && parsed.result) {
+              latestResult = parsed.result; // 直接覆蓋，非累積
+              bubble.innerHTML = formatMessageText(latestResult);
+              scrollChatToBottom();
             }
+          } catch {
+            // 忽略解析失敗的零碎片段
           }
         }
       }
+    }
+
+    // 串流結束
+    if (latestResult) {
+      bubble.innerHTML = formatMessageText(latestResult);
     } else {
-      // Regular JSON payload
-      const resJson = await response.json();
-      const reply = resJson.answer || resJson.reply || resJson.content || resJson.response || resJson.text || JSON.stringify(resJson);
-      simulateAiResponse(reply);
+      bubble.innerHTML = '<span style="opacity:0.5;">（AI 未回傳有效回覆）</span>';
     }
+    scrollChatToBottom();
+
   } catch (err) {
-    console.error('Live API Query failed:', err);
-    const loader = document.getElementById('typing-bubble');
-    if (loader) {
-      loader.parentElement.remove();
+    console.error('[GeminiData API] 呼叫失敗:', err);
+    document.getElementById('loader-row')?.remove();
+    const bubble = document.getElementById('streaming-bubble');
+    if (bubble) bubble.parentElement?.remove();
+
+    appendSystemMessage(`⚠️ API 連線失敗（${err.message}），自動切換至本地模擬解答。`);
+    let mockReply = `已收到您的問題。正在檢索本案卷宗與法學知識庫...\n\n針對您的提問「${questionText}」，合規精靈建議：\n\n1. 應重新調閱專員與客戶的通聯記錄或臨櫃錄影。\n2. 對照同類型商品爭議之金評會判定，我方應在答辯書中強調客戶已簽署之風險預告書條款，但需防範法官引用《金保法》適合度漏洞。`;
+    if (questionText.includes('報告')) {
+      mockReply = `## 金融消費爭議案件合規審查意見書 (草稿)\n\n*   **案號**：${activeCaseId}\n*   **審查重點**：${caseDb[activeCaseId]?.item ?? '未載入'}\n\n### ⚖️ 合規性判定\n根據現有事證，本案評估有顯著合規疏失風險，主要集中於適合度規範之落實與風險揭露聲明。\n\n### 💡 行動方案指引\n1. **協議和解**：爭取於評議程序前取得和解。\n2. **合規宣導**：加強前線理專之風險告知抽查比率。`;
     }
-    
-    // Notify fallback and run local mock reply
-    appendSystemMessage(`API 連線逾時，自動切換至本地專家大模型模擬解答。`);
-    let mockReply = '已收到您的問題。正在檢索本案卷宗與法學知識庫...\n\n針對您的提問「' + questionText + '」，合規精靈建議：\n\n1. 應重新調閱專員與客戶的通聯記錄或臨櫃錄影。\n2. 對照同類型商品爭議之金評會判定，我方應在答辯書中強調客戶已簽署之風險預告書條款，但需防範法官引用《金保法》適合度漏洞。';
-    if (questionText.includes('報告') || questionText.includes('報告草稿')) {
-      mockReply = '## 金融消費爭議案件合規審查意見書 (草稿)\n\n*   **案號**：' + activeCaseId + '\n*   **審查重點**：' + caseDb[activeCaseId].item + '\n\n### ⚖️ 合規性判定\n根據現有事證，本案評估有顯著合規疏失風險，主要集中於適合度規範之落實與風險揭露聲明是否被口頭承諾所架空。\n\n### 💡 行動方案指引\n1. **協議和解**：爭取於評議程序前取得和解。\n2. **合規宣導**：加強前線理專之風險告知抽查比率。';
-    }
-    setTimeout(() => {
-      simulateAiResponse(mockReply);
-    }, 600);
+    setTimeout(() => simulateAiResponse(mockReply), 500);
   }
 }
 
@@ -863,5 +707,5 @@ function scrollChatToBottom() {
   }
 }
 
-// Initialize UI and API variables
+// Initialize UI (純前端模式：不需要後端 API 初始化)
 window.onload = initApi;
