@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Compliance Workspace - 智能合規工作台</title>
+  <title>Compliance Genie 合規精靈 - 智能合規工作台</title>
   <meta name="description" content="AI-Native 金融消費爭議合規工作台 - 搜尋、分析、引法、諮詢一體化解決方案">
 
   <!-- Google Fonts -->
@@ -37,7 +37,7 @@
           </linearGradient>
         </defs>
       </svg>
-      <h2>Compliance Workspace</h2>
+      <h2>Compliance Genie 合規精靈</h2>
     </div>
     
     <div class="user-profile">
@@ -170,13 +170,56 @@
         <!-- Chat column -->
         <div class="chat-section" id="chat-scroller">
           <!-- Welcome instructions -->
-          <div class="chat-welcome-state" id="chat-empty">
-            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 18a3.75 3.75 0 00.495-7.467 5.99 5.99 0 00-1.925 3.546 5.974 5.974 0 01-2.133-1A3.75 3.75 0 0012 18z"></path>
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
-            </svg>
-            <h3>Compliance AI 協作室</h3>
-            <p>已備妥法規庫與案例引擎。請在上方載入案件，AI 將會在此與您一同審查合規風險、比對適法性並擬定合規報告。</p>
+          <div class="chat-welcome-state" id="chat-empty" style="max-width: 680px; text-align: left; margin: auto; padding: 2rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
+              <span class="feature-tag" style="background: rgba(197, 160, 89, 0.1); color: var(--accent-gold-dark); border: 1px solid rgba(197, 160, 89, 0.2); font-size: 0.75rem; padding: 0.25rem 0.50rem; border-radius: 4px;">FinTech / LegalTech 應用</span>
+            </div>
+            
+            <h3 style="font-size: 1.75rem; font-family: 'Outfit', sans-serif; color: var(--text-main); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+              <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" style="width: 32px; height: 32px; color: var(--accent-gold); flex-shrink: 0;">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l3.582-1.791L16.164 21l-.813-5.096c.143-.315.233-.663.233-1.03a3.375 3.375 0 10-6.75 0c0 .367.09.715.233 1.03z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+              </svg>
+              合規精靈 <span style="font-size: 1.25rem; font-weight: 400; color: var(--text-muted);">Compliance Genie</span>
+            </h3>
+            
+            <p style="font-size: 0.95rem; font-weight: 500; color: var(--text-main); line-height: 1.6; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px dashed var(--border-color);">
+              <strong>核心價值：</strong>透過 AI 技術縮短金融從業人員處理消費爭議的時間，提升合規處理的精確度與效率。
+            </p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.5rem;">
+              <div style="background: rgba(255, 255, 255, 0.4); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <h4 style="font-size: 0.85rem; font-weight: 600; color: #dc2626; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.3rem;">
+                  <span>⚠️ 專案背景與從業痛點</span>
+                </h4>
+                <p style="font-size: 0.78rem; line-height: 1.5; color: var(--text-muted); margin-bottom: 0.6rem;">
+                  金融消費爭議涉及龐雜的法規與歷年判決，現行高度依賴個人經驗，查詢極為耗時，面臨以下挑戰：
+                </p>
+                <ul style="font-size: 0.78rem; line-height: 1.45; color: var(--text-main); padding-left: 1.1rem; margin: 0; display: flex; flex-direction: column; gap: 0.4rem;">
+                  <li><strong>查詢門檻高</strong>：需在大量破碎的法規中搜尋正確依據。</li>
+                  <li><strong>分析耗時長</strong>：需人工反覆閱讀案件內容並對照法規細節。</li>
+                  <li><strong>決策風險大</strong>：因資訊龐雜，可能導致分析判斷的遺漏或不一致。</li>
+                </ul>
+              </div>
+
+              <div style="background: rgba(255, 255, 255, 0.4); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <h4 style="font-size: 0.85rem; font-weight: 600; color: var(--accent-blue); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.3rem;">
+                  <span>🎯 產品使命 (Mission)</span>
+                </h4>
+                <p style="font-size: 0.78rem; line-height: 1.5; color: var(--text-muted); margin-bottom: 0.6rem;">
+                  建置「AI 智慧合規輔助系統」作為數位助手：
+                </p>
+                <ul style="font-size: 0.78rem; line-height: 1.45; color: var(--text-main); padding-left: 1.1rem; margin: 0; display: flex; flex-direction: column; gap: 0.4rem;">
+                  <li><strong>企業 RAG 整合</strong>：整合 LLM 與企業既有知識庫。</li>
+                  <li><strong>高效獲取建議</strong>：協助使用者在短時間內獲取精確的法規建議。</li>
+                  <li><strong>提升決策品質</strong>：協助完成案件摘要，並進行初步的合規風險評估。</li>
+                </ul>
+              </div>
+            </div>
+
+            <div style="text-align: center; background: rgba(197, 160, 89, 0.05); padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid rgba(197, 160, 89, 0.15); font-size: 0.8rem; color: var(--accent-gold-dark); font-weight: 500;">
+              💡 請先在左側欄位<strong>載入測試案件</strong>，或直接使用<strong>快速搜尋</strong>開始進行 AI 協作！
+            </div>
           </div>
 
           <!-- Chat Stream Container -->

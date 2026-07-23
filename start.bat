@@ -13,7 +13,7 @@ pip install -r backend\requirements.txt
 
 :START_SERVERS
 echo [1/2] Starting Frontend Server (Port 5500)...
-start "Frontend Server" cmd /k "python -m http.server 5500"
+start "Frontend Server" cmd /k "python backend/serve.py 5500"
 
 echo [2/2] Starting FastAPI Backend Proxy (Port 8000)...
 start "Backend Proxy" cmd /k "call .\.venv\Scripts\activate.bat && cd backend && python -m uvicorn main:app --reload"
