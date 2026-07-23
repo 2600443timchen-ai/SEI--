@@ -47,6 +47,11 @@ async def health_check():
 @app.api_route("/api/{full_path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def proxy(full_path: str, request: Request):
     settings = get_settings()
+    
+    # 自動相容舊版的路徑：將 assistant/chat/ 改寫為 chat/
+    if full_path.startswith("assistant/chat/"):
+        full_path = full_path.replace("assistant/chat/", "chat/", 1)
+        
     target_url = f"{settings.API_BASE}/{full_path}"
     
     # Prepare headers
@@ -58,20 +63,40 @@ async def proxy(full_path: str, request: Request):
     content_type = request.headers.get("content-type")
     if content_type:
         client_headers["Content-Type"] = content_type
-    else:
-        client_headers["Content-Type"] = "application/json"
 
-    async with httpx.AsyncClient() as client:
-        resp = await client.request(
+    try:
+        # 為了支援 Streaming，不能使用 async with，需要自己控制 client 和 response 的生命週期
+        client = httpx.AsyncClient(timeout=300.0)
+        req = client.build_request(
             request.method,
             target_url,
+            params=request.query_params,
             headers=client_headers,
-            content=await request.body(),
-            timeout=30.0,
+            content=await request.body()
+        )
+        resp = await client.send(req, stream=True)
+    except httpx.HTTPError as e:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Proxy error: {str(e)}"
         )
         
-    return Response(
-        content=resp.content,
+    response_headers = dict(resp.headers)
+    # 移除這些 headers 避免瀏覽器在處理串流時發生衝突
+    response_headers.pop("content-encoding", None)
+    response_headers.pop("content-length", None)
+
+    async def stream_generator():
+        try:
+            async for chunk in resp.aiter_raw():
+                yield chunk
+        finally:
+            await resp.aclose()
+            await client.aclose()
+
+    from fastapi.responses import StreamingResponse
+    return StreamingResponse(
+        stream_generator(),
         status_code=resp.status_code,
-        media_type=resp.headers.get("content-type", "application/json"),
+        headers=response_headers,
     )

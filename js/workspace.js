@@ -536,9 +536,11 @@ function toggleSection(id, headerEl) {
   const el = document.getElementById(id);
   if (el.style.display === 'none' || el.style.maxHeight === '0px') {
     el.style.display = 'flex';
-    el.style.maxHeight = '500px';
+    el.style.maxHeight = '420px';
+    el.style.overflowY = 'auto';
     headerEl.classList.remove('collapsed');
   } else {
+    el.style.overflowY = 'hidden';
     el.style.maxHeight = '0px';
     setTimeout(() => { el.style.display = 'none'; }, 300);
     headerEl.classList.add('collapsed');
@@ -730,7 +732,7 @@ async function sendQuestionToApi(questionText) {
     const response = await fetch(`${API_BASE}/chat/${activeChatId}`, {
       method: 'POST',
       headers: getHeaders(),
-      body: JSON.stringify({ question: questionText })
+      body: JSON.stringify({ q: questionText, streaming: true })
     });
 
     // Remove loader bubble
@@ -773,7 +775,7 @@ async function sendQuestionToApi(questionText) {
               if (dataStr === '[DONE]') continue;
               try {
                 const parsed = JSON.parse(dataStr);
-                const word = parsed.choices?.[0]?.delta?.content || parsed.text || parsed.answer || parsed.content || '';
+                const word = parsed.result || parsed.choices?.[0]?.delta?.content || parsed.text || parsed.answer || parsed.content || '';
                 fullText += word;
                 bubble.innerHTML = formatMessageText(fullText);
                 scrollChatToBottom();
