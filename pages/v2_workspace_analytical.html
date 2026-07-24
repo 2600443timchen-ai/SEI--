@@ -12,6 +12,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
         rel="stylesheet">
+    <!-- Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- Custom Stylesheets -->
     <link rel="stylesheet" href="../css/global.css">
     <link rel="stylesheet" href="../css/workspace.css?v=2.0">
@@ -120,11 +122,27 @@
         }
 
         .insight-text {
-            font-size: 1rem;
-            line-height: 1.6;
+            font-size: 0.95rem;
+            line-height: 1.7;
             color: #334155;
             font-weight: 500;
+            max-height: 280px;
+            overflow-y: auto;
         }
+        .insight-text::-webkit-scrollbar { width: 4px; }
+        .insight-text::-webkit-scrollbar-thumb { background: rgba(197,160,89,0.3); border-radius: 4px; }
+
+        /* Markdown rendered elements */
+        .insight-text p { margin: 0 0 0.5rem 0; }
+        .insight-text ul, .insight-text ol { margin: 0.25rem 0 0.5rem 1.2rem; padding: 0; }
+        .insight-text li { margin-bottom: 0.2rem; }
+        .insight-text strong { background: rgba(197, 160, 89, 0.15); color: #997b43; padding: 0 4px; border-radius: 4px; font-weight: 600; }
+        .insight-text h1, .insight-text h2, .insight-text h3 { font-family: 'Outfit', sans-serif; color: #1e3a8a; margin: 0.5rem 0 0.25rem 0; }
+        .insight-text h1 { font-size: 1.1rem; }
+        .insight-text h2 { font-size: 1rem; }
+        .insight-text h3 { font-size: 0.95rem; }
+        .insight-text code { background: rgba(30,58,138,0.06); padding: 1px 5px; border-radius: 4px; font-size: 0.88rem; }
+        .insight-text blockquote { border-left: 3px solid var(--accent-gold); margin: 0.5rem 0; padding: 0.25rem 0.75rem; color: #64748b; background: rgba(197,160,89,0.04); border-radius: 0 6px 6px 0; }
         
         .insight-text highlight {
             background: rgba(197, 160, 89, 0.15);
@@ -181,32 +199,62 @@
         /* Network nodes */
         .network-container {
             position: relative;
-            height: 180px;
+            height: 280px;
             background: radial-gradient(circle at center, rgba(30, 58, 138, 0.02) 0%, transparent 70%);
             border-radius: var(--radius-md);
             overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        }
+        .network-container svg.graph-lines {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            pointer-events: none;
         }
         .net-node {
             position: absolute;
-            padding: 0.4rem 0.8rem;
+            padding: 0.35rem 0.7rem;
             background: white;
-            border: 1px solid var(--accent-gold);
+            border: 1.5px solid var(--accent-gold);
             color: var(--accent-gold-dark);
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: 600;
             box-shadow: 0 4px 10px rgba(197, 160, 89, 0.15);
             z-index: 2;
+            white-space: nowrap;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: default;
         }
-        .net-line {
-            position: absolute;
-            background: rgba(30, 58, 138, 0.2);
-            height: 2px;
-            z-index: 1;
-            transform-origin: left center;
+        .net-node:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 18px rgba(197, 160, 89, 0.3);
+        }
+        .net-node.node-law {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold-dark);
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border-width: 2px;
+            font-size: 0.8rem;
+        }
+        .net-node.node-obligation {
+            border-color: #3b82f6;
+            color: #1d4ed8;
+            background: #eff6ff;
+        }
+        .net-node.node-consequence {
+            border-color: #ef4444;
+            color: #b91c1c;
+            background: #fef2f2;
+        }
+        .net-node.node-case {
+            border-color: #10b981;
+            color: #065f46;
+            background: #ecfdf5;
+        }
+        .net-node .node-icon {
+            display: inline-block;
+            margin-right: 3px;
         }
 
         /* Metrics cards */
@@ -315,40 +363,40 @@
         <div class="search-wrapper">
             <!-- Filter Dropdowns instead of Search Bar -->
             <div style="display: flex; gap: 0.5rem; flex: 1;">
-                <select class="search-input" style="flex: 1; border-radius: var(--radius-md); padding-left: 0.5rem; font-size: 0.85rem; color: #475569; font-weight: 500; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); background: white;">
+                <select id="filter-category" class="search-input" style="flex: 1; border-radius: var(--radius-md); padding-left: 0.5rem; font-size: 0.85rem; color: #475569; font-weight: 500; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); background: white;">
                     <option value="" disabled selected>爭議類別</option>
                     <option value="all">全部類別</option>
                     <option value="investment">投資型商品</option>
                     <option value="insurance">醫療理賠</option>
                     <option value="creditcard">信用卡交易</option>
                 </select>
-                <select class="search-input" style="flex: 1; border-radius: var(--radius-md); padding-left: 0.5rem; font-size: 0.85rem; color: #475569; font-weight: 500; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); background: white;">
+                <select id="filter-product" class="search-input" style="flex: 1; border-radius: var(--radius-md); padding-left: 0.5rem; font-size: 0.85rem; color: #475569; font-weight: 500; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); background: white;">
                     <option value="" disabled selected>商品類型</option>
                     <option value="all">全部商品</option>
                     <option value="fund">共同基金</option>
                     <option value="policy">結構型保單</option>
                     <option value="loan">信貸產品</option>
                 </select>
-                <select class="search-input" style="flex: 1; border-radius: var(--radius-md); padding-left: 0.5rem; font-size: 0.85rem; color: #475569; font-weight: 500; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); background: white;">
+                <select id="filter-segment" class="search-input" style="flex: 1; border-radius: var(--radius-md); padding-left: 0.5rem; font-size: 0.85rem; color: #475569; font-weight: 500; cursor: pointer; border: 1px solid rgba(0,0,0,0.1); background: white;">
                     <option value="" disabled selected>客戶分群</option>
                     <option value="all">不限</option>
                     <option value="senior">高齡族群</option>
                     <option value="vip">高資產客戶</option>
                 </select>
             </div>
-            <button class="search-btn" onclick="alert('載入符合條件之批次資料...')">
+            <button id="load-analysis-btn" class="search-btn" onclick="loadBatchAnalysis()">
                 <span>載入分析</span>
             </button>
         </div>
         <div class="quick-tags">
             <span>最新批次快速篩選:</span>
-            <button class="tag-btn" onclick="alert('切換: 2023 Q4 信用卡高風險批次')">2023 Q4 信用卡高風險</button>
-            <button class="tag-btn" onclick="alert('切換: 投資型保單 (高齡客群)')">投資型保單 (高齡客群)</button>
+            <button class="tag-btn" onclick="applyQuickFilter('credit')">2023 Q4 信用卡高風險</button>
+            <button class="tag-btn" onclick="applyQuickFilter('senior_invest')">投資型保單 (高齡客群)</button>
         </div>
     </section>
 
     <!-- Main Dashboard Workspace -->
-    <main class="workspace-container" style="display: block; overflow: hidden; padding-right: 0;">
+    <main id="dashboard-main-content" class="workspace-container" style="display: block; overflow: hidden; padding-right: 0; transition: opacity 0.3s ease;">
         <div class="dashboard-container">
             
             <!-- Narrative Insight Engine (FR-08) -->
@@ -359,8 +407,8 @@
                     </svg>
                     Narrative Insight 敘事性洞察 (FR-08)
                 </div>
-                <div class="insight-text">
-                    本批載入之 1,245 件金融消費爭議中，以 <highlight>信用卡交易爭議</highlight> 佔比最高（42%），主要集中於「未經授權交易」與「特約商店請款爭議」。值得注意的是，<highlight>高齡客群（65歲以上）</highlight> 在「投資型保單」板塊的申訴率較上季上升 15%，且多涉及<highlight>金保法第10條（充分瞭解商品及風險）</highlight>。建議法遵部近期加強理專銷售流程的錄音錄影抽查與高齡商品合規宣導。
+                <div id="narrative-insight-text" class="insight-text">
+                    請點擊左側「載入分析」以生成最新批次之敘事洞察分析報告...
                 </div>
             </div>
 
@@ -383,24 +431,9 @@
                                     <th style="border-bottom: 2px solid #e2e8f0; padding: 6px; color: #10b981;">低風險</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="matrix-tbody">
                                 <tr>
-                                    <td style="padding: 8px 6px; border-bottom: 1px solid #f1f5f9; text-align: left;">投資型保單<br><span style="font-size:0.7rem;color:#94a3b8">涉: 金保法§10</span></td>
-                                    <td style="background: rgba(239,68,68,0.15); color: #991b1b; padding: 8px 6px; font-weight: 600;">45 件</td>
-                                    <td style="background: rgba(245,158,11,0.05); padding: 8px 6px;">12 件</td>
-                                    <td style="padding: 8px 6px; color: #64748b;">5 件</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 8px 6px; border-bottom: 1px solid #f1f5f9; text-align: left;">信用卡交易<br><span style="font-size:0.7rem;color:#94a3b8">涉: 消保法§12</span></td>
-                                    <td style="background: rgba(239,68,68,0.3); color: #991b1b; padding: 8px 6px; font-weight:bold;">128 件</td>
-                                    <td style="background: rgba(245,158,11,0.15); padding: 8px 6px;">34 件</td>
-                                    <td style="padding: 8px 6px; color: #64748b;">22 件</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 8px 6px; text-align: left;">醫療險理賠<br><span style="font-size:0.7rem;color:#94a3b8">涉: 保險法§54</span></td>
-                                    <td style="padding: 8px 6px; color: #64748b;">2 件</td>
-                                    <td style="background: rgba(245,158,11,0.15); padding: 8px 6px;">45 件</td>
-                                    <td style="background: rgba(16,185,129,0.1); padding: 8px 6px;">89 件</td>
+                                    <td colspan="4" style="padding: 12px; color: #94a3b8;">等待資料載入中...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -413,17 +446,9 @@
                         <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
                         知識探索圖譜 (FR-10)
                     </div>
-                    <div class="network-container">
-                        <!-- Simulated SVG lines with bidirectional hints -->
-                        <div class="net-line" style="width: 80px; top: 50%; left: 30%; transform: rotate(-20deg); border-top: 1px dashed rgba(30,58,138,0.5);"></div>
-                        <div class="net-line" style="width: 90px; top: 50%; left: 30%; transform: rotate(35deg);"></div>
-                        <div class="net-line" style="width: 70px; top: 25%; left: 55%; transform: rotate(45deg);"></div>
-                        
-                        <!-- Simulated Nodes (Cross-Domain) -->
-                        <div class="net-node" style="left: 10%; top: 40%; font-size: 0.85rem; border-color: #3b82f6; color: #1d4ed8; background: #eff6ff;">產品: 投資單</div>
-                        <div class="net-node" style="left: 48%; top: 15%; font-size: 0.95rem; border-width: 2px;">法規: 金保法 §10</div>
-                        <div class="net-node" style="left: 55%; top: 65%; font-size: 0.85rem; border-color: #ef4444; color: #b91c1c; background: #fef2f2;">爭議: 未盡告知</div>
-                        <div class="net-node" style="left: 75%; top: 35%; background: #f8fafc; color: #64748b; border-color: #cbd5e1; font-size: 0.85rem;">案件: C-1029</div>
+                    <div id="knowledge-graph" class="network-container">
+                        <!-- 由 JS 動態渲染知識圖譜節點與連線 -->
+                        <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #94a3b8; font-size: 0.85rem;">等待資料載入中...</div>
                     </div>
                 </div>
 
@@ -436,15 +461,15 @@
                     <div class="metrics-grid">
                         <div class="metric-item">
                             <span class="metric-label">平均引用法規數 (案件複雜度)</span>
-                            <span class="metric-value">3.4 <span style="font-size: 1rem; color: #ef4444; font-weight: 500;">↑ 12%</span></span>
+                            <span id="metric-avg-law" class="metric-value">--</span>
                         </div>
                         <div class="metric-item">
                             <span class="metric-label">最高風險佔比商品</span>
-                            <span class="metric-value" style="font-size: 1.4rem; padding-top: 0.35rem;">結構型投資單</span>
+                            <span id="metric-high-risk-product" class="metric-value" style="font-size: 1.4rem; padding-top: 0.35rem;">--</span>
                         </div>
                         <div class="metric-item">
                             <span class="metric-label">單案平均爭議涉案金額</span>
-                            <span class="metric-value">NT$ 42.5W <span style="font-size: 1rem; color: #10b981; font-weight: 500;">↓ 5%</span></span>
+                            <span id="metric-avg-amount" class="metric-value">--</span>
                         </div>
                     </div>
                 </div>
@@ -452,6 +477,15 @@
             </div>
         </div>
     </main>
+
+    <script src="../js/config.js?v=2"></script>
+    <script src="../js/workspace_analytical.js?v=1"></script>
+    <script>
+        // 初始化呼叫載入分析
+        window.onload = () => {
+            loadBatchAnalysis();
+        };
+    </script>
 </body>
 
 </html>
