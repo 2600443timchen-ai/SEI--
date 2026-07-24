@@ -25,6 +25,61 @@
   <!-- Custom Stylesheets -->
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/workspace.css?v=2.0">
+  <style>
+    /* Segmented Control Styles */
+    .segmented-nav {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.05);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      padding: 3px;
+      border-radius: 20px;
+      gap: 3px;
+      backdrop-filter: blur(10px);
+    }
+
+    .segmented-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 16px;
+      border: none;
+      background: transparent;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: #64748b;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+    }
+
+    .segmented-btn:hover {
+      color: #1e293b;
+    }
+
+    .segmented-btn.active {
+      background: #ffffff;
+      color: #1e3a8a;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .badge-new {
+      font-size: 0.65rem;
+      background: linear-gradient(135deg, #c5a059, #b38b40);
+      color: white;
+      padding: 1px 6px;
+      border-radius: 8px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    /* Compact Search Wrapper */
+    .search-wrapper {
+      max-width: 480px !important;
+    }
+  </style>
 </head>
 
 <body>
@@ -34,7 +89,7 @@
   <div class="orb orb-right"></div>
 
   <!-- Header -->
-  <header>
+  <header style="position: relative;">
     <div class="brand-logo" onclick="location.href='../index.html'">
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="url(#grad1)" />
@@ -76,14 +131,39 @@
   </header>
 
   <!-- Search Section -->
-  <section class="search-section">
+  <section class="search-section" style="position: relative;">
+    <!-- Centered Hero Pill Container (Aligned to search-wrapper top) -->
+    <div class="hero-pill-container"
+      style="position: absolute; left: 50%; top: var(--gap); transform: translateX(-50%); z-index: 10;">
+      <div class="segmented-nav">
+        <button class="segmented-btn active" title="目前視圖：單一案件處置工作台">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          <span>案件處置工作台</span>
+        </button>
+        <button class="segmented-btn" title="切換至巨觀交叉分析與知識圖譜"
+          onclick="location.href='v2_workspace_analytical.html'">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          <span>交叉分析與洞察儀表板</span>
+          <span class="badge-new">NEW</span>
+        </button>
+      </div>
+    </div>
+
     <div class="search-wrapper">
       <div class="search-input-container">
         <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <input type="text" id="case-search" class="search-input" placeholder="輸入案件編號 (如: C-20231015-001) 或關鍵字...">
+        <input type="text" id="case-search" class="search-input" placeholder="輸入案件編號 (如: C001) 或關鍵字...">
       </div>
       <button class="search-btn" onclick="triggerSearch()">
         <span>搜尋</span>
@@ -91,8 +171,8 @@
     </div>
     <div class="quick-tags">
       <span>快速試用:</span>
-      <button class="tag-btn" onclick="setSearch('C-20231015-001')">C-20231015-001 (投資型保單)</button>
-      <button class="tag-btn" onclick="setSearch('C-20231102-005')">C-20231102-005 (實支實付險)</button>
+      <button class="tag-btn" onclick="setSearch('C001')">C001 (投資型保單)</button>
+      <button class="tag-btn" onclick="setSearch('C002')">C002 (實支實付險)</button>
     </div>
   </section>
 

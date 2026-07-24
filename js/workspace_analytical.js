@@ -166,17 +166,17 @@ function tryParseAiJson(text) {
 }
 
 // ============================================================
-// 4. 快速篩選按鈕
+// 4. 快速篩選按鈕 (與 C-20231015-001 / C-20231102-005 範例案件對齊)
 // ============================================================
 function applyQuickFilter(preset) {
-    if (preset === 'credit') {
-        document.getElementById('filter-category').value = 'creditcard';
-        document.getElementById('filter-product').value = 'all';
-        document.getElementById('filter-segment').value = 'all';
-    } else if (preset === 'senior_invest') {
+    if (preset === 'case_invest') {
         document.getElementById('filter-category').value = 'investment';
         document.getElementById('filter-product').value = 'policy';
         document.getElementById('filter-segment').value = 'senior';
+    } else if (preset === 'case_insurance') {
+        document.getElementById('filter-category').value = 'insurance';
+        document.getElementById('filter-product').value = 'all';
+        document.getElementById('filter-segment').value = 'all';
     }
     loadBatchAnalysis();
 }
@@ -454,16 +454,54 @@ function renderMetrics(data) {
 // 7. Fallback Mock Data Generator
 // ============================================================
 function getMockData(category, product, segment) {
-    let focusText = '信用卡爭議';
-    let lawText = '消保法 §12';
-    
-    if (category === 'investment' || product === 'policy') {
-        focusText = '投資型保單';
-        lawText = '金保法 §10';
+    if (category === 'insurance') {
+        return {
+            narrative: `本批次分析涵蓋 620 件醫療給付爭議案件（對標 **C002** 類案件）。系統偵測到 **日間住院實支實付理賠拒賠爭議** 佔比最高（54%），主要集中於「精神科/慢性病日間留院是否符合合約住院定義」。依據 **保險法第54-1條 (疑義利益歸於被保險人原則)** 及 **精神衛生法第35條**，保險公司拒賠立場相對薄弱，建議合規部評估通融給付或調整標準契約條款。`,
+            matrix: [
+                { product: '實支實付醫療險', law: '保險法 §54-1', highRisk: 168, medRisk: 82, lowRisk: 15 },
+                { product: '意外傷害險', law: '保險法 §131', highRisk: 32, medRisk: 64, lowRisk: 110 },
+                { product: '重大疾病險', law: '保險法 §125', highRisk: 8, medRisk: 25, lowRisk: 116 }
+            ],
+            lawGraph: [
+                {
+                    law: '保險法 第54-1條 (有利解釋原則)',
+                    obligations: ['探求當事人真意', '疑義有利於被保險人'],
+                    consequences: ['通融給付', '勝訴率低'],
+                    cases: [{ '編號': 'C002' }]
+                },
+                {
+                    law: '精神衛生法 第35條 (醫療服務)',
+                    obligations: ['日間留院屬正規醫療'],
+                    consequences: ['符合實質住院要件'],
+                    cases: []
+                },
+                {
+                    law: '保險法 第131條 (傷害保險)',
+                    obligations: ['外來突發事故認定'],
+                    consequences: ['理賠金額給付'],
+                    cases: []
+                }
+            ],
+            riskData: {
+                level: '中風險',
+                violations: ['契約住院定義不明確', '忽視精神衛生法正規醫療認定', '未作有利被保險人解釋'],
+                cases: []
+            },
+            graph: { product: '實支實付險', law: '保險法 §54-1', issue: '日間住院拒賠', caseId: 'C002' },
+            metrics: {
+                avgLaw: '3.1',
+                highRiskProduct: '實支實付醫療險',
+                avgAmount: 'NT$ 8.4W'
+            }
+        };
     }
 
+    // 預設/投資型保單 (C001 對標批次)
+    let focusText = '投資型保單';
+    let lawText = '金保法 §10';
+
     return {
-        narrative: `本次批次分析涵蓋 850 件案件。系統偵測到 **${focusText}** 佔比顯著偏高，尤其在 **${segment === 'senior' ? '高齡客群' : '一般客群'}** 中，多涉及 **${lawText} (未盡告知義務)**。建議法遵部針對此類商品啟動專案查核，並加強前線理專的銷售話術錄音監管。`,
+        narrative: `本次批次分析涵蓋 850 件案件（對標 **C001** 類案件）。系統偵測到 **${focusText}** 佔比顯著偏高（42%），尤其在 **${segment === 'senior' ? '高齡客群 (65歲以上)' : '一般客群'}** 中，多涉及 **${lawText} (未盡告知義務)** 與 **金保法第9條 (適合度原則)**。理專涉嫌誘導修改風險屬性評估表，建議法遵部針對此類商品啟動專案查核，並加強前線理專的銷售話術錄音監管。`,
         matrix: [
             { product: focusText, law: lawText, highRisk: 142, medRisk: 55, lowRisk: 12 },
             { product: '信貸產品', law: '個資法 §20', highRisk: 24, medRisk: 89, lowRisk: 150 },
@@ -480,20 +518,25 @@ function getMockData(category, product, segment) {
                 law: '金保法 第10條 (說明義務)',
                 obligations: ['充分說明商品', '風險揭露'],
                 consequences: ['賠償損失'],
-                cases: [{ '編號': 'C-20231015' }]
+                cases: [{ '編號': 'C001' }]
             },
             {
-                law: '民法 第184條 (侵權)',
-                obligations: ['不得侵害權利'],
-                consequences: ['損害賠償'],
+                law: '民法 第184條 (侵權責任)',
+                obligations: ['不得故意或過失侵害權利'],
+                consequences: ['損害賠償責任'],
                 cases: []
             }
         ],
-        graph: { product: focusText, law: lawText, issue: '未盡告知', caseId: 'C-8921' },
+        riskData: {
+            level: '高風險',
+            violations: ['誘導變造風險問卷', '未充分揭露匯損與本金風險', '適合度審查流於形式'],
+            cases: []
+        },
+        graph: { product: focusText, law: lawText, issue: '未盡告知', caseId: 'C001' },
         metrics: {
             avgLaw: '4.2',
             highRiskProduct: focusText,
-            avgAmount: 'NT$ 85.2W'
+            avgAmount: 'NT$ 35.0W'
         }
     };
 }
